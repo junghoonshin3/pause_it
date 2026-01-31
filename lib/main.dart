@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'shared/data/database/database_helper.dart';
-import 'features/categories/presentation/screens/categories_list_screen.dart';
+import 'features/categories/presentation/screens/categories_list_screen_brutalist.dart';
 import 'features/videos/presentation/providers/video_provider.dart';
 import 'core/services/notification_service.dart';
+import 'core/theme/app_theme.dart';
 
 /// [main] - 앱 진입점
 ///
@@ -109,21 +110,10 @@ class _MyAppState extends ConsumerState<MyApp> {
     return MaterialApp(
       title: 'Pause it',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      home: const CategoriesListScreen(),
+      theme: AppTheme.darkTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark,
+      home: const CategoriesListScreenBrutalist(),
     );
   }
 }

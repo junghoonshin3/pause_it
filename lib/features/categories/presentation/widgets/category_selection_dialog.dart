@@ -98,6 +98,9 @@ class CategorySelectionDialog extends ConsumerWidget {
 
     if (!context.mounted) return;
 
+    // 영상 개수 카운트 갱신
+    ref.invalidate(videoCountProvider(category.id!));
+
     // sharedUrlStateProvider 초기화
     ref.read(sharedUrlStateProvider.notifier).state = null;
     Navigator.pop(context);

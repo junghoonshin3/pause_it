@@ -1,35 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/category.dart';
-import '../providers/category_provider.dart';
-import '../widgets/category_card_brutalist.dart';
-import '../widgets/add_edit_category_dialog.dart';
-import '../widgets/category_selection_dialog.dart';
-import '../../../videos/presentation/screens/video_list_screen_brutalist.dart';
-import '../../../videos/presentation/providers/video_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../categories/domain/entities/category.dart';
+import '../../domain/entities/video.dart';
+import '../providers/video_provider.dart';
+import '../providers/notification_provider.dart';
+import '../widgets/video_card_brutalist.dart';
+import '../widgets/add_video_dialog.dart';
+import '../widgets/edit_video_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// [CategoriesListScreenBrutalist] - Neo-Brutalist 디자인의 카테고리 메인 화면
+/// [VideoListScreenBrutalist] - Neo-Brutalist 디자인의 영상 목록 화면
+///
+/// 주요 기능:
+/// - 특정 카테고리의 영상 목록 표시
+/// - 영상 추가 FAB
+/// - 영상 재생 (YouTube 앱/웹 열기)
+/// - 영상 편집/삭제
+/// - 타임스탬프 업데이트
 ///
 /// 디자인 특징:
 /// - 대담한 타이포그래피와 비대칭 레이아웃
 /// - 날카로운 기하학적 형태
 /// - 강렬한 색상 대비
 /// - 레이어드 UI와 강한 그림자
-class CategoriesListScreenBrutalist extends ConsumerWidget {
-  const CategoriesListScreenBrutalist({super.key});
+///
+/// Parameters:
+/// - [category]: 표시할 카테고리
+class VideoListScreenBrutalist extends ConsumerWidget {
+  final Category category;
+
+  const VideoListScreenBrutalist({
+    super.key,
+    required this.category,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categoriesAsync = ref.watch(categoryListProvider);
-    final sharedUrlResult = ref.watch(sharedUrlStateProvider);
-
-    // 공유 URL 처리
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (sharedUrlResult != null) {
-        _showCategorySelectionDialog(context, ref, sharedUrlResult);
-      }
-    });
+    // 영상 목록 상태 구독
+    final videosAsync = ref.watch(videoListProvider(category.id!));
 
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
@@ -38,19 +47,19 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 커스텀 헤더
-            _buildBrutalistHeader(context, ref, categoriesAsync),
+            _buildBrutalistHeader(context, ref, videosAsync),
 
             // 메인 콘텐츠
             Expanded(
-              child: categoriesAsync.when(
+              child: videosAsync.when(
                 loading: () => _buildLoadingView(context),
                 error: (error, stackTrace) =>
                     _buildErrorView(context, error.toString()),
-                data: (categories) {
-                  if (categories.isEmpty) {
+                data: (videos) {
+                  if (videos.isEmpty) {
                     return _buildEmptyView(context, ref);
                   }
-                  return _buildCategoryGrid(context, ref, categories);
+                  return _buildVideoList(context, ref, videos);
                 },
               ),
             ),
@@ -67,10 +76,10 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
   Widget _buildBrutalistHeader(
     BuildContext context,
     WidgetRef ref,
-    AsyncValue categoriesAsync,
+    AsyncValue videosAsync,
   ) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       decoration: BoxDecoration(
         color: AppTheme.primaryDark,
         border: Border(
@@ -83,44 +92,59 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 타이틀 with accent mark
+          // 상단 네비게이션
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 뒤로가기 버튼
+              _buildIconButton(
+                context: context,
+                icon: Icons.arrow_back,
+                color: AppTheme.textPrimary,
+                onPressed: () => Navigator.pop(context),
+              ),
+
+              const SizedBox(width: 16),
+
+              // 카테고리 아이콘
               Container(
-                width: 6,
-                height: 48,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppTheme.accentElectric,
-                      AppTheme.accentNeon,
-                    ],
+                  color: category.color,
+                  border: Border.all(
+                    color: AppTheme.primaryDark,
+                    width: 3,
                   ),
                 ),
+                child: Icon(
+                  Icons.folder,
+                  size: 24,
+                  color: _getContrastColor(category.color),
+                ),
               ),
-              const SizedBox(width: 16),
+
+              const SizedBox(width: 12),
+
+              // 카테고리 이름
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'PAUSE IT',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w900,
+                      category.name.toUpperCase(),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
                             color: AppTheme.textPrimary,
-                            letterSpacing: 2,
-                            height: 0.9,
+                            letterSpacing: 0.5,
                           ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
                     Text(
-                      'TIMESTAMP ARCHIVE',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: AppTheme.accentElectric,
-                            letterSpacing: 3,
+                      'VIDEOS',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: category.color,
+                            letterSpacing: 2,
                           ),
                     ),
                   ],
@@ -133,7 +157,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                 icon: Icons.refresh,
                 color: AppTheme.accentElectric,
                 onPressed: () {
-                  ref.read(categoryListProvider.notifier).loadCategories();
+                  ref.read(videoListProvider(category.id!).notifier).loadVideos();
                 },
               ),
             ],
@@ -142,10 +166,10 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // 통계 스트립
-          categoriesAsync.when(
-            data: (categories) => _buildStatsStrip(context, categories.length),
-            loading: () => _buildStatsStrip(context, 0),
-            error: (_, __) => _buildStatsStrip(context, 0),
+          videosAsync.when(
+            data: (videos) => _buildStatsStrip(context, videos),
+            loading: () => _buildStatsStrip(context, []),
+            error: (e, _) => _buildStatsStrip(context, []),
           ),
         ],
       ),
@@ -153,13 +177,13 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
   }
 
   /// [_buildStatsStrip] - 통계 정보 스트립
-  Widget _buildStatsStrip(BuildContext context, int categoryCount) {
+  Widget _buildStatsStrip(BuildContext context, List<Video> videos) {
     return Row(
       children: [
         _buildStatBox(
           context: context,
-          label: 'CATEGORIES',
-          value: '$categoryCount',
+          label: 'VIDEOS',
+          value: '${videos.length}',
           color: AppTheme.accentElectric,
         ),
       ],
@@ -212,72 +236,50 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 48,
-        height: 48,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           color: AppTheme.secondaryDark,
           border: Border.all(color: color, width: 2),
         ),
-        child: Icon(icon, color: color, size: 24),
+        child: Icon(icon, color: color, size: 22),
       ),
     );
   }
 
-  /// [_buildCategoryGrid] - 카테고리 그리드
-  Widget _buildCategoryGrid(
+  /// [_buildVideoList] - 영상 목록 생성
+  Widget _buildVideoList(
     BuildContext context,
     WidgetRef ref,
-    List<Category> categories,
+    List<Video> videos,
   ) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(24),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 220,
-        mainAxisExtent: 220,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-      ),
-      itemCount: categories.length,
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: videos.length,
       itemBuilder: (context, index) {
-        final category = categories[index];
-        final videoCountAsync = ref.watch(videoCountProvider(category.id!));
-
+        final video = videos[index];
         return TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
           duration: Duration(
-            milliseconds: 300 + (index * 50),
+            milliseconds: 200 + (index * 50),
           ),
           curve: Curves.easeOutCubic,
           builder: (context, value, child) {
             return Transform.translate(
-              offset: Offset(0, 30 * (1 - value)),
+              offset: Offset(0, 20 * (1 - value)),
               child: Opacity(
                 opacity: value,
                 child: child,
               ),
             );
           },
-          child: videoCountAsync.when(
-            data: (count) => CategoryCardBrutalist(
-              category: category,
-              videoCount: count,
-              onTap: () => _navigateToVideoList(context, ref, category),
-              onEdit: () => _showEditCategoryDialog(context, ref, category),
-              onDelete: () => _deleteCategory(context, ref, category),
-            ),
-            loading: () => CategoryCardBrutalist(
-              category: category,
-              videoCount: 0,
-              onTap: () => _navigateToVideoList(context, ref, category),
-              onEdit: () => _showEditCategoryDialog(context, ref, category),
-              onDelete: () => _deleteCategory(context, ref, category),
-            ),
-            error: (_, __) => CategoryCardBrutalist(
-              category: category,
-              videoCount: 0,
-              onTap: () => _navigateToVideoList(context, ref, category),
-              onEdit: () => _showEditCategoryDialog(context, ref, category),
-              onDelete: () => _deleteCategory(context, ref, category),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: VideoCardBrutalist(
+              video: video,
+              onTap: () => _playVideo(context, video),
+              onEdit: () => _showEditVideoDialog(context, ref, video),
+              onDelete: () => _deleteVideo(context, ref, video),
             ),
           ),
         );
@@ -285,7 +287,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     );
   }
 
-  /// [_buildEmptyView] - 빈 화면
+  /// [_buildEmptyView] - 빈 화면 상태
   Widget _buildEmptyView(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
@@ -300,7 +302,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: AppTheme.secondaryDark,
                 border: Border.all(
-                  color: AppTheme.accentElectric,
+                  color: category.color,
                   width: 4,
                 ),
                 boxShadow: [
@@ -311,17 +313,17 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.folder_open,
+              child: Icon(
+                Icons.video_library_outlined,
                 size: 70,
-                color: AppTheme.accentElectric,
+                color: category.color,
               ),
             ),
 
             const SizedBox(height: 32),
 
             Text(
-              'NO CATEGORIES',
+              'NO VIDEOS',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: AppTheme.textPrimary,
@@ -342,7 +344,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                '카테고리를 추가하여\n유튜브 영상을 관리하세요',
+                '우측 하단 버튼을 눌러\nYouTube 영상을 추가해보세요',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppTheme.textSecondary,
                       height: 1.6,
@@ -452,7 +454,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
   /// [_buildBrutalistFAB] - Brutalist FAB
   Widget _buildBrutalistFAB(BuildContext context, WidgetRef ref) {
     return InkWell(
-      onTap: () => _showAddCategoryDialog(context, ref),
+      onTap: () => _showAddVideoDialog(context, ref),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
@@ -475,7 +477,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             const Icon(Icons.add, color: AppTheme.primaryDark, size: 24),
             const SizedBox(width: 8),
             Text(
-              'ADD',
+              'ADD VIDEO',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: AppTheme.primaryDark,
                     fontWeight: FontWeight.w900,
@@ -490,28 +492,42 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
 
   // ============ 액션 메서드들 ============
 
-  void _showAddCategoryDialog(BuildContext context, WidgetRef ref) {
+  /// [_showAddVideoDialog] - 영상 추가 다이얼로그 표시
+  void _showAddVideoDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AddEditCategoryDialog(
-        onSave: (name, colorValue) async {
-          final success = await ref
-              .read(categoryListProvider.notifier)
-              .addCategory(name, colorValue);
+      builder: (context) => AddVideoDialog(
+        categoryId: category.id!,
+        onVideoAdded: (video) async {
+          // 영상 추가 (저장된 영상 객체 반환 - ID 포함)
+          final savedVideo = await ref
+              .read(videoListProvider(category.id!).notifier)
+              .addVideo(video);
 
           if (!context.mounted) return;
 
-          if (success) {
+          // 결과 메시지 표시
+          if (savedVideo != null && savedVideo.id != null) {
+            // 알림 스케줄 (10분 후) - 저장된 영상의 ID 사용
+            final notificationService = ref.read(notificationServiceProvider);
+            await notificationService.scheduleVideoReminder(
+              videoId: savedVideo.id!,
+              videoTitle: savedVideo.title,
+              youtubeVideoId: savedVideo.youtubeVideoId,
+              timestampSeconds: savedVideo.timestampSeconds,
+            );
+
+            if (!context.mounted) return;
             _showBrutalistSnackbar(
               context,
-              'CATEGORY ADDED',
+              'VIDEO ADDED (REMINDER IN 10 MIN)',
               AppTheme.success,
               Icons.check_circle,
             );
           } else {
             _showBrutalistSnackbar(
               context,
-              'FAILED TO ADD',
+              'FAILED TO ADD VIDEO',
               AppTheme.error,
               Icons.error,
             );
@@ -521,135 +537,170 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     );
   }
 
-  void _showEditCategoryDialog(
+  /// [_showEditVideoDialog] - 영상 편집 다이얼로그 표시
+  void _showEditVideoDialog(
     BuildContext context,
     WidgetRef ref,
-    Category category,
+    Video video,
   ) {
-    showDialog(
-      context: context,
-      builder: (context) => AddEditCategoryDialog(
-        category: category,
-        onSave: (name, colorValue) async {
-          final updatedCategory = Category(
-            id: category.id,
-            name: name,
-            colorValue: colorValue,
-            createdAt: category.createdAt,
-            updatedAt: DateTime.now(),
-          );
-
-          final success = await ref
-              .read(categoryListProvider.notifier)
-              .updateCategory(updatedCategory);
-
-          if (!context.mounted) return;
-
-          if (success) {
-            _showBrutalistSnackbar(
-              context,
-              'CATEGORY UPDATED',
-              AppTheme.success,
-              Icons.check_circle,
-            );
-          } else {
-            _showBrutalistSnackbar(
-              context,
-              'FAILED TO UPDATE',
-              AppTheme.error,
-              Icons.error,
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  Future<void> _deleteCategory(
-    BuildContext context,
-    WidgetRef ref,
-    Category category,
-  ) async {
-    // 카테고리 개수 체크 - 1개면 삭제 불가
-    final categoriesState = ref.read(categoryListProvider);
-    final categoryCount = categoriesState.valueOrNull?.length ?? 0;
-
-    if (categoryCount <= 1) {
+    // 🔒 LAYER 1 VALIDATION: Check if category.id exists
+    if (category.id == null) {
       _showBrutalistSnackbar(
         context,
-        'CANNOT DELETE LAST CATEGORY',
-        AppTheme.warning,
-        Icons.warning,
+        'INVALID CATEGORY: CANNOT EDIT VIDEO',
+        AppTheme.error,
+        Icons.error,
       );
       return;
     }
 
-    final success =
-        await ref.read(categoryListProvider.notifier).deleteCategory(category.id!);
+    showDialog(
+      context: context,
+      builder: (context) => EditVideoDialog(
+        video: video,
+        currentCategoryId: category.id!, // Safe after null check
+        onSave: (updatedVideo) async {
+          // 카테고리가 변경된 경우
+          if (updatedVideo.categoryId != category.id) {
+            // 영상 정보 수정 (새 카테고리 ID 포함)
+            final success = await ref
+                .read(videoListProvider(category.id!).notifier)
+                .updateVideo(updatedVideo);
+
+            if (!context.mounted) return;
+
+            if (success) {
+              // 현재 목록에서 영상 제거 (다른 카테고리로 이동됨)
+              ref.read(videoListProvider(category.id!).notifier).loadVideos();
+              // 두 카테고리의 영상 개수 갱신
+              ref.invalidate(videoCountProvider(category.id!));
+              ref.invalidate(videoCountProvider(updatedVideo.categoryId));
+              _showBrutalistSnackbar(
+                context,
+                'VIDEO MOVED TO ANOTHER CATEGORY',
+                AppTheme.success,
+                Icons.check_circle,
+              );
+            } else {
+              _showBrutalistSnackbar(
+                context,
+                'FAILED TO MOVE VIDEO',
+                AppTheme.error,
+                Icons.error,
+              );
+            }
+          } else {
+            // 카테고리 변경 없이 정보만 수정
+            final success = await ref
+                .read(videoListProvider(category.id!).notifier)
+                .updateVideo(updatedVideo);
+
+            if (!context.mounted) return;
+
+            if (success) {
+              _showBrutalistSnackbar(
+                context,
+                'VIDEO UPDATED',
+                AppTheme.success,
+                Icons.check_circle,
+              );
+            } else {
+              _showBrutalistSnackbar(
+                context,
+                'FAILED TO UPDATE VIDEO',
+                AppTheme.error,
+                Icons.error,
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  /// [_deleteVideo] - 영상 삭제
+  Future<void> _deleteVideo(
+    BuildContext context,
+    WidgetRef ref,
+    Video video,
+  ) async {
+    // 알림 취소
+    final notificationService = ref.read(notificationServiceProvider);
+    await notificationService.cancelNotification(video.id!);
+
+    // 영상 삭제
+    final success = await ref
+        .read(videoListProvider(category.id!).notifier)
+        .deleteVideo(video.id!);
 
     if (!context.mounted) return;
 
     if (success) {
       _showBrutalistSnackbar(
         context,
-        'CATEGORY DELETED',
+        'VIDEO DELETED',
         AppTheme.success,
         Icons.check_circle,
       );
     } else {
       _showBrutalistSnackbar(
         context,
-        'FAILED TO DELETE',
+        'FAILED TO DELETE VIDEO',
         AppTheme.error,
         Icons.error,
       );
     }
   }
 
-  void _navigateToVideoList(BuildContext context, WidgetRef ref, Category category) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            VideoListScreenBrutalist(category: category),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeOutCubic;
+  /// [_playVideo] - YouTube 영상 재생
+  Future<void> _playVideo(BuildContext context, Video video) async {
+    try {
+      // YouTube URL 생성 (타임스탬프 포함)
+      final url = Uri.parse(
+        'https://www.youtube.com/watch?v=${video.youtubeVideoId}&t=${video.timestampSeconds}s',
+      );
 
-          var tween = Tween(begin: begin, end: end).chain(
-            CurveTween(curve: curve),
-          );
+      // URL 열기 시도
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication, // YouTube 앱 우선 실행
+      );
 
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
+      // 실패 시 처리
+      if (!launched) {
+        if (!context.mounted) return;
+
+        // 대안: 브라우저에서 열기
+        final browserLaunched = await launchUrl(
+          url,
+          mode: LaunchMode.platformDefault,
+        );
+
+        if (!context.mounted) return;
+        if (!browserLaunched) {
+          _showBrutalistSnackbar(
+            context,
+            'CANNOT OPEN YOUTUBE',
+            AppTheme.error,
+            Icons.error,
           );
-        },
-        transitionDuration: AppTheme.animationDurationNormal,
-      ),
-    ).then((_) {
-      // 영상 목록 화면에서 돌아올 때 영상 개수 갱신
-      ref.invalidate(videoCountProvider(category.id!));
-    });
+        }
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      _showBrutalistSnackbar(
+        context,
+        'FAILED TO PLAY VIDEO',
+        AppTheme.error,
+        Icons.error,
+      );
+    }
   }
 
-  void _showCategorySelectionDialog(
-    BuildContext context,
-    WidgetRef ref,
-    result,
-  ) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => CategorySelectionDialog(
-        sharedUrlResult: result,
-        onCancel: () {
-          ref.read(sharedUrlStateProvider.notifier).state = null;
-          Navigator.pop(context);
-        },
-      ),
-    );
+  /// [_getContrastColor] - 배경색에 대비되는 색상 반환
+  Color _getContrastColor(Color backgroundColor) {
+    final luminance = backgroundColor.computeLuminance();
+    return luminance > 0.5 ? AppTheme.primaryDark : AppTheme.textPrimary;
   }
 
   void _showBrutalistSnackbar(

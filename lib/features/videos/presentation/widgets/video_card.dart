@@ -13,13 +13,11 @@ import '../../domain/entities/video.dart';
 /// - [onTap]: 카드 탭 시 콜백 (영상 재생)
 /// - [onEdit]: 편집 버튼 탭 시 콜백
 /// - [onDelete]: 삭제 버튼 탭 시 콜백
-/// - [onUpdateTimestamp]: 타임스탬프 업데이트 콜백
 class VideoCard extends StatelessWidget {
   final Video video;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  final Function(int seconds)? onUpdateTimestamp;
 
   const VideoCard({
     super.key,
@@ -27,7 +25,6 @@ class VideoCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
-    this.onUpdateTimestamp,
   });
 
   @override
@@ -265,16 +262,6 @@ class VideoCard extends StatelessWidget {
             ),
             const Divider(height: 1),
 
-            // 타임스탬프 업데이트
-            ListTile(
-              leading: const Icon(Icons.update),
-              title: const Text('타임스탬프 업데이트'),
-              onTap: () {
-                Navigator.pop(context);
-                _showTimestampUpdateDialog(context);
-              },
-            ),
-
             // 편집
             ListTile(
               leading: const Icon(Icons.edit),
@@ -310,63 +297,6 @@ class VideoCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  /// [_showTimestampUpdateDialog] - 타임스탬프 업데이트 다이얼로그
-  void _showTimestampUpdateDialog(BuildContext context) {
-    final controller = TextEditingController(
-      text: _formatDuration(video.timestampSeconds),
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('타임스탬프 업데이트'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '새로운 타임스탬프를 입력하세요\n(형식: MM:SS 또는 HH:MM:SS)',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: '타임스탬프',
-                hintText: '1:23 또는 1:23:45',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.access_time),
-              ),
-              keyboardType: TextInputType.text,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final seconds = _parseDuration(controller.text);
-              if (seconds != null && onUpdateTimestamp != null) {
-                onUpdateTimestamp!(seconds);
-                Navigator.pop(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('올바른 형식으로 입력해주세요 (예: 1:23)'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('업데이트'),
-          ),
-        ],
       ),
     );
   }

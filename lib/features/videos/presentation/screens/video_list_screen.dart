@@ -117,8 +117,6 @@ class VideoListScreen extends ConsumerWidget {
             onTap: () => _playVideo(context, video),
             onEdit: () => _showEditVideoDialog(context, ref, video),
             onDelete: () => _deleteVideo(context, ref, video),
-            onUpdateTimestamp: (seconds) =>
-                _updateTimestamp(context, ref, video.id!, seconds),
           ),
         );
       },
@@ -147,21 +145,11 @@ class VideoListScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '아래 버튼을 눌러 YouTube 영상을 추가해보세요.',
+              '우측 하단 버튼을 눌러 YouTube 영상을 추가해보세요.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: () => _showAddVideoDialog(context, ref),
-              icon: const Icon(Icons.add),
-              label: const Text('영상 추가'),
-              style: FilledButton.styleFrom(
-                backgroundColor: category.color,
-                foregroundColor: _getContrastColor(category.color),
-              ),
             ),
           ],
         ),
@@ -263,6 +251,9 @@ class VideoListScreen extends ConsumerWidget {
             if (success) {
               // 현재 목록에서 영상 제거 (다른 카테고리로 이동됨)
               ref.read(videoListProvider(category.id!).notifier).loadVideos();
+              // 두 카테고리의 영상 개수 갱신
+              ref.invalidate(videoCountProvider(category.id!));
+              ref.invalidate(videoCountProvider(updatedVideo.categoryId));
               _showSuccessSnackbar(context, '영상이 다른 카테고리로 이동되었습니다');
             } else {
               _showErrorSnackbar(context, '영상 이동에 실패했습니다');
@@ -307,26 +298,6 @@ class VideoListScreen extends ConsumerWidget {
       _showSuccessSnackbar(context, '영상이 삭제되었습니다');
     } else {
       _showErrorSnackbar(context, '영상 삭제에 실패했습니다');
-    }
-  }
-
-  /// [_updateTimestamp] - 타임스탬프 업데이트
-  Future<void> _updateTimestamp(
-    BuildContext context,
-    WidgetRef ref,
-    int videoId,
-    int timestampSeconds,
-  ) async {
-    final success = await ref
-        .read(videoListProvider(category.id!).notifier)
-        .updateTimestamp(videoId, timestampSeconds);
-
-    if (!context.mounted) return;
-
-    if (success) {
-      _showSuccessSnackbar(context, '타임스탬프가 업데이트되었습니다');
-    } else {
-      _showErrorSnackbar(context, '타임스탬프 업데이트에 실패했습니다');
     }
   }
 

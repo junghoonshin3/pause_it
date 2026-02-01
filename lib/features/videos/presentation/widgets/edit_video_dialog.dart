@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
@@ -61,6 +62,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
     _memoController = TextEditingController(
       text: widget.video.memo ?? '',
     );
+    // 🔒 LAYER 2 VALIDATION: Initialize with currentCategoryId (guaranteed non-null by Layer 1)
     _selectedCategoryId = widget.currentCategoryId;
   }
 
@@ -92,15 +94,21 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
             // 타임스탬프 수정
             TextField(
               controller: _timestampController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: '타임스탬프',
                 hintText: '1:23 또는 1:23:45',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.access_time),
-                helperText: '중단한 시점을 입력하세요',
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.access_time),
+                helperText: widget.video.durationSeconds != null
+                    ? '중단한 시점을 입력하세요 (최대: ${_formatDuration(widget.video.durationSeconds!)})'
+                    : '중단한 시점을 입력하세요',
               ),
-              keyboardType: TextInputType.text,
+              keyboardType: TextInputType.number,
               textInputAction: TextInputAction.next,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
+                _TimeStampInputFormatter(),
+              ],
             ),
             const SizedBox(height: 16),
 
@@ -234,17 +242,31 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
 
   /// [_buildCategoryDropdown] - 카테고리 드롭다운
   Widget _buildCategoryDropdown(List<Category> categories) {
+    // 🔒 LAYER 2 VALIDATION: Filter out categories with null IDs
+    final validCategories = categories.where((c) => c.id != null).toList();
+
+    // 🔒 Ensure selected category exists in valid list
+    if (_selectedCategoryId != null) {
+      final categoryExists = validCategories.any((c) => c.id == _selectedCategoryId);
+      if (!categoryExists && validCategories.isNotEmpty) {
+        _selectedCategoryId = validCategories.first.id;
+      }
+    } else if (validCategories.isNotEmpty) {
+      _selectedCategoryId = validCategories.first.id;
+    }
+
     return DropdownButtonFormField<int>(
-      value: _selectedCategoryId,
+      value: _selectedCategoryId, // Validated by Layer 2
       decoration: const InputDecoration(
         labelText: '카테고리',
         border: OutlineInputBorder(),
         prefixIcon: Icon(Icons.folder),
       ),
-      items: categories.map((category) {
+      items: validCategories.map((category) {
         return DropdownMenuItem<int>(
-          value: category.id,
+          value: category.id!, // Guaranteed non-null by Layer 2 filtering
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 16,
@@ -255,16 +277,14 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  category.name,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              Text(
+                category.name,
+                overflow: TextOverflow.ellipsis,
               ),
               // 현재 카테고리 표시
-              if (category.id == widget.currentCategoryId)
+              if (category.id == widget.currentCategoryId) ...[
+                const SizedBox(width: 8),
                 Container(
-                  margin: const EdgeInsets.only(left: 8),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,
                     vertical: 2,
@@ -281,6 +301,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
                     ),
                   ),
                 ),
+              ],
             ],
           ),
         );
@@ -296,16 +317,57 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
 
   /// [_handleSave] - 저장 처리
   void _handleSave() {
-    // 타임스탬프 파싱
-    final newTimestamp = _parseDuration(_timestampController.text) ?? 0;
+    // 타임스탬프 파싱 (초 단위로 변환)
+    final newTimestamp = _parseDuration(_timestampController.text);
+
+    // 타임스탬프 형식 검증
+    if (newTimestamp == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('올바른 타임스탬프 형식을 입력하세요 (예: 1:23 또는 1:23:45)'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // 디버깅: 값 확인
+    debugPrint('🔍 입력된 타임스탬프(초): $newTimestamp');
+    debugPrint('🔍 영상 총 길이(초): ${widget.video.durationSeconds}');
+
+    // 영상 길이 초과 검증
+    if (widget.video.durationSeconds != null) {
+      if (newTimestamp > widget.video.durationSeconds!) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '❌ 타임스탬프(${_formatDuration(newTimestamp)})가 '
+              '영상 길이(${_formatDuration(widget.video.durationSeconds!)})를 초과할 수 없습니다',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
+    } else {
+      // durationSeconds가 null인 경우 경고
+      debugPrint('⚠️ 경고: 영상 길이 정보가 없습니다. 검증을 건너뜁니다.');
+    }
+
     final newMemo = _memoController.text.trim().isEmpty
         ? null
         : _memoController.text.trim();
 
+    // 🔒 LAYER 3 VALIDATION: Use _selectedCategoryId (guaranteed non-null by Layer 2)
+    // Layer 2 ensures _selectedCategoryId is always valid, so this is safe
+    final finalCategoryId = _selectedCategoryId!;
+
     // 수정된 Video 객체 생성
     final updatedVideo = Video(
       id: widget.video.id,
-      categoryId: _selectedCategoryId ?? widget.currentCategoryId,
+      categoryId: finalCategoryId, // Guaranteed non-null by Layer 2 validation
       youtubeUrl: widget.video.youtubeUrl,
       youtubeVideoId: widget.video.youtubeVideoId,
       title: widget.video.title,
@@ -354,21 +416,64 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
   int? _parseDuration(String input) {
     try {
       final parts = input.trim().split(':');
+      if (parts.isEmpty || parts.any((p) => p.isEmpty)) {
+        return null;
+      }
+
       if (parts.length == 2) {
         // MM:SS
         final minutes = int.parse(parts[0]);
         final seconds = int.parse(parts[1]);
+        if (seconds >= 60) return null; // 초는 0~59
         return minutes * 60 + seconds;
       } else if (parts.length == 3) {
         // HH:MM:SS
         final hours = int.parse(parts[0]);
         final minutes = int.parse(parts[1]);
         final seconds = int.parse(parts[2]);
+        if (minutes >= 60 || seconds >= 60) return null; // 분, 초는 0~59
         return hours * 3600 + minutes * 60 + seconds;
       }
-      return 0;
+      return null;
     } catch (e) {
-      return 0;
+      return null;
     }
+  }
+}
+
+/// [_TimeStampInputFormatter] - 타임스탬프 입력 포맷터
+///
+/// 주요 기능:
+/// - 숫자와 콜론(:)만 입력 가능
+/// - 연속된 콜론(::) 방지
+/// - 최대 2개의 콜론까지만 허용 (HH:MM:SS 형식)
+class _TimeStampInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+
+    // 빈 문자열은 허용
+    if (text.isEmpty) return newValue;
+
+    // 연속된 콜론 방지
+    if (text.contains('::')) {
+      return oldValue;
+    }
+
+    // 콜론 개수 제한 (최대 2개: HH:MM:SS)
+    final colonCount = ':'.allMatches(text).length;
+    if (colonCount > 2) {
+      return oldValue;
+    }
+
+    // 콜론으로 시작하면 안 됨
+    if (text.startsWith(':')) {
+      return oldValue;
+    }
+
+    return newValue;
   }
 }

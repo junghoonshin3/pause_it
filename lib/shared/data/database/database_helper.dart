@@ -99,7 +99,27 @@ class DatabaseHelper {
     // 일괄 실행
     await batch.commit(noResult: true);
 
+    // 기본 카테고리 생성
+    await _createDefaultCategory(db);
+
     print('✅ 데이터베이스 테이블 생성 완료 (버전: $version)');
+  }
+
+  /// [_createDefaultCategory] - 기본 카테고리 생성
+  ///
+  /// 앱 최초 실행 시 "기본" 카테고리를 자동으로 생성
+  /// 카테고리는 최소 1개 이상 있어야 하므로 필수
+  Future<void> _createDefaultCategory(Database db) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db.insert(
+      DatabaseConstants.tableCategories,
+      {
+        'name': '기본',
+        'color_value': 0xFF2196F3, // 파란색
+        'created_at': now,
+        'updated_at': now,
+      },
+    );
   }
 
   /// [_onUpgrade] - 데이터베이스 버전 업그레이드 시 호출

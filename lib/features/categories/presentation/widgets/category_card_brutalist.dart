@@ -122,8 +122,9 @@ class _CategoryCardBrutalistState extends State<CategoryCardBrutalist>
 
                   // 메인 콘텐츠
                   Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 상단: 비디오 카운트 배지
@@ -170,7 +171,7 @@ class _CategoryCardBrutalistState extends State<CategoryCardBrutalist>
                           ],
                         ),
 
-                        const Spacer(),
+                        const SizedBox(height: 20),
 
                         // 중앙: 카테고리 아이콘 (큰 기하학적 형태)
                         Container(
@@ -190,7 +191,7 @@ class _CategoryCardBrutalistState extends State<CategoryCardBrutalist>
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
 
                         // 하단: 카테고리 이름 (대담한 타이포그래피)
                         Text(

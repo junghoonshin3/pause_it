@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Flavor-specific secrets and signing configs
+android/key.properties
+android/app/keystore.jks
+android/app/*.jks
+android/app/*.keystore
+ios/ExportOptions.plist
+*.p12
+*.mobileprovision
+
+# Firebase config files (추후 추가 시)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist

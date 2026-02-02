@@ -1,0 +1,115 @@
+{
+  "@@locale": "en",
+  "appTitle": "PAUSE IT",
+  "appSubtitle": "TIMESTAMP ARCHIVE",
+  "commonButtonAdd": "Add",
+  "commonButtonSave": "Save",
+  "commonButtonCancel": "Cancel",
+  "commonButtonConfirm": "Confirm",
+  "commonButtonDelete": "Delete",
+  "commonButtonEdit": "Edit",
+  "commonLoading": "LOADING...",
+  "commonError": "ERROR",
+  "brutalistAdd": "ADD",
+  "brutalistCategories": "CATEGORIES",
+  "brutalistVideos": "VIDEOS",
+  "brutalistNoCategories": "NO CATEGORIES",
+  "brutalistNoCategoriesDesc": "Add categories to\nmanage your YouTube videos",
+  "brutalistNoVideos": "NO VIDEOS",
+  "brutalistNoVideosDesc": "Add videos to\nrecord timestamps",
+  "brutalistCategoryAdded": "CATEGORY ADDED",
+  "brutalistCategoryUpdated": "CATEGORY UPDATED",
+  "brutalistCategoryDeleted": "CATEGORY DELETED",
+  "brutalistFailedToAdd": "FAILED TO ADD",
+  "brutalistFailedToUpdate": "FAILED TO UPDATE",
+  "brutalistFailedToDelete": "FAILED TO DELETE",
+  "brutalistCannotDeleteLast": "CANNOT DELETE LAST CATEGORY",
+  "brutalistVideoAdded": "VIDEO ADDED",
+  "brutalistVideoUpdated": "VIDEO UPDATED",
+  "brutalistVideoDeleted": "VIDEO DELETED",
+  "brutalistVideoMoved": "VIDEO MOVED",
+  "brutalistConfirmDelete": "CONFIRM DELETE",
+  "categoryAddTitle": "Add Category",
+  "categoryEditTitle": "Edit Category",
+  "categoryNameLabel": "Category Name",
+  "categoryNameHint": "e.g., Dev Tutorials, Music, Cooking",
+  "categoryColorLabel": "Select Color",
+  "categoryCurrentBadge": "Current",
+  "categoryErrorEmpty": "Please enter a category name.",
+  "categoryErrorMinLength": "Category name must be at least 2 characters.",
+  "categoryDeleteConfirmTitle": "Delete Category",
+  "categoryDeleteConfirmMessage": "Delete {name} category?\nAll videos will also be deleted.",
+  "@categoryDeleteConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySelectionTitle": "Select Category",
+  "categorySelectionPrompt": "Which category do you want to add to?",
+  "categorySelectionAddSuccess": "Video added to {name}",
+  "@categorySelectionAddSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySelectionAddFailed": "Failed to add video",
+  "categorySelectionEmpty": "No categories available",
+  "categorySelectionEmptyDesc": "Please create a category first",
+  "categorySelectionLoadError": "Unable to load categories",
+  "videoAddTitle": "Add Video",
+  "videoEditTitle": "Edit Video",
+  "videoAddPrompt": "Enter YouTube video URL",
+  "videoUrlLabel": "YouTube URL",
+  "videoUrlHint": "https://www.youtube.com/watch?v=...",
+  "videoTimestampLabel": "Timestamp (Optional)",
+  "videoTimestampHint": "1:23 or 1:23:45",
+  "videoTimestampHelperDefault": "Enter where you stopped (Default: 0:00)",
+  "videoTimestampHelperWithMax": "Enter where you stopped (Max: {max})",
+  "@videoTimestampHelperWithMax": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "videoTimestampHelperEdit": "Enter where you stopped",
+  "videoMemoLabel": "Memo (Optional)",
+  "videoMemoHint": "Enter a memo for this video",
+  "videoMemoHelper": "Write something to remember later",
+  "videoCategoryLabel": "Category",
+  "videoCategoryMoveInfo": "Video will move to new category on save",
+  "videoLoadingMetadata": "Fetching video info...",
+  "videoDeleteConfirmTitle": "Delete Video",
+  "videoDeleteConfirmMessage": "Delete this video?",
+  "videoPlayButton": "Play",
+  "videoPlayWithTime": "Play from timestamp",
+  "errorUrlEmpty": "Please enter a URL",
+  "errorUrlInvalid": "Invalid YouTube URL",
+  "errorNetwork": "Network error: Check your internet connection",
+  "errorVideoNotFound": "Video not found (private/deleted)",
+  "errorVideoMetadataFailed": "Failed to fetch video info",
+  "errorTimestampInvalidFormat": "Enter valid timestamp format (e.g., 1:23 or 1:23:45)",
+  "errorTimestampExceeds": "Timestamp ({timestamp}) cannot exceed video duration ({duration})",
+  "@errorTimestampExceeds": {
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "errorGeneric": "An error occurred",
+  "notificationVideoAdded": "Video added",
+  "notificationVideoUpdated": "Video updated",
+  "notificationVideoDeleted": "Video deleted",
+  "notificationCategoryAdded": "Category added",
+  "notificationCategoryUpdated": "Category updated",
+  "notificationCategoryDeleted": "Category deleted",
+  "notificationCannotDeleteLastCategory": "Cannot delete last category"
+}

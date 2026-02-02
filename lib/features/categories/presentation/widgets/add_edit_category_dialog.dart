@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/category.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 /// [AddEditCategoryDialog] - 카테고리 추가/편집 다이얼로그
 ///
@@ -98,8 +99,10 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return AlertDialog(
-      title: Text(_isAddMode ? '카테고리 추가' : '카테고리 편집'),
+      title: Text(_isAddMode ? l10n.categoryAddTitle : l10n.categoryEditTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -108,11 +111,11 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
             // 카테고리 이름 입력
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: '카테고리 이름',
-                hintText: '예: 개발 강의, 음악, 요리 등',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.label),
+              decoration: InputDecoration(
+                labelText: l10n.categoryNameLabel,
+                hintText: l10n.categoryNameHint,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.label),
               ),
               maxLength: 50,
               autofocus: true,
@@ -122,7 +125,7 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
 
             // 색상 선택 섹션
             Text(
-              '색상 선택',
+              l10n.categoryColorLabel,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 12),
@@ -136,13 +139,13 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
         // 취소 버튼
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('취소'),
+          child: Text(l10n.commonButtonCancel),
         ),
 
         // 저장 버튼
         FilledButton(
           onPressed: _handleSave,
-          child: Text(_isAddMode ? '추가' : '저장'),
+          child: Text(_isAddMode ? l10n.commonButtonAdd : l10n.commonButtonSave),
         ),
       ],
     );
@@ -201,16 +204,17 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
   ///
   /// 유효성 검증 후 onSave 콜백 호출
   void _handleSave() {
+    final l10n = AppLocalizations.of(context);
     final name = _nameController.text.trim();
 
     // 유효성 검증
     if (name.isEmpty) {
-      _showErrorSnackbar('카테고리 이름을 입력해주세요.');
+      _showErrorSnackbar(l10n.categoryErrorEmpty);
       return;
     }
 
     if (name.length < 2) {
-      _showErrorSnackbar('카테고리 이름은 최소 2자 이상이어야 합니다.');
+      _showErrorSnackbar(l10n.categoryErrorMinLength);
       return;
     }
 

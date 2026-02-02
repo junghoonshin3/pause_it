@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../domain/entities/video.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 /// [EditVideoDialog] - 영상 편집 다이얼로그
 ///
@@ -77,9 +78,10 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
   Widget build(BuildContext context) {
     // 카테고리 목록 가져오기
     final categoriesAsync = ref.watch(categoryListProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      title: const Text('영상 편집'),
+      title: Text(l10n.videoEditTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -95,13 +97,13 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
             TextField(
               controller: _timestampController,
               decoration: InputDecoration(
-                labelText: '타임스탬프',
-                hintText: '1:23 또는 1:23:45',
+                labelText: l10n.videoTimestampLabel,
+                hintText: l10n.videoTimestampHint,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.access_time),
                 helperText: widget.video.durationSeconds != null
-                    ? '중단한 시점을 입력하세요 (최대: ${_formatDuration(widget.video.durationSeconds!)})'
-                    : '중단한 시점을 입력하세요',
+                    ? l10n.videoTimestampHelperWithMax(_formatDuration(widget.video.durationSeconds!))
+                    : l10n.videoTimestampHelperEdit,
               ),
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.next,
@@ -115,12 +117,12 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
             // 메모 수정
             TextField(
               controller: _memoController,
-              decoration: const InputDecoration(
-                labelText: '메모 (선택)',
-                hintText: '이 영상에 대한 메모를 입력하세요',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.note),
-                helperText: '나중에 기억할 내용을 적어두세요',
+              decoration: InputDecoration(
+                labelText: l10n.videoMemoLabel,
+                hintText: l10n.videoMemoHint,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.note),
+                helperText: l10n.videoMemoHelper,
               ),
               maxLines: 3,
               maxLength: 500,
@@ -131,7 +133,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
             // 카테고리 이동
             categoriesAsync.when(
               loading: () => const LinearProgressIndicator(),
-              error: (error, stack) => const Text('카테고리를 불러올 수 없습니다'),
+              error: (error, stack) => Text(l10n.categorySelectionLoadError),
               data: (categories) => _buildCategoryDropdown(categories),
             ),
 
@@ -149,7 +151,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        '저장 시 영상이 새 카테고리로 이동됩니다',
+                        l10n.videoCategoryMoveInfo,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                             ),
@@ -165,13 +167,13 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
         // 취소 버튼
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('취소'),
+          child: Text(l10n.commonButtonCancel),
         ),
 
         // 저장 버튼
         FilledButton(
           onPressed: _handleSave,
-          child: const Text('저장'),
+          child: Text(l10n.commonButtonSave),
         ),
       ],
     );
@@ -242,6 +244,8 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
 
   /// [_buildCategoryDropdown] - 카테고리 드롭다운
   Widget _buildCategoryDropdown(List<Category> categories) {
+    final l10n = AppLocalizations.of(context)!;
+
     // 🔒 LAYER 2 VALIDATION: Filter out categories with null IDs
     final validCategories = categories.where((c) => c.id != null).toList();
 
@@ -257,10 +261,10 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
 
     return DropdownButtonFormField<int>(
       value: _selectedCategoryId, // Validated by Layer 2
-      decoration: const InputDecoration(
-        labelText: '카테고리',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.folder),
+      decoration: InputDecoration(
+        labelText: l10n.videoCategoryLabel,
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.folder),
       ),
       items: validCategories.map((category) {
         return DropdownMenuItem<int>(
@@ -294,7 +298,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    '현재',
+                    l10n.categoryCurrentBadge,
                     style: TextStyle(
                       fontSize: 10,
                       color: Colors.grey[600],
@@ -317,16 +321,18 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
 
   /// [_handleSave] - 저장 처리
   void _handleSave() {
+    final l10n = AppLocalizations.of(context)!;
+
     // 타임스탬프 파싱 (초 단위로 변환)
     final newTimestamp = _parseDuration(_timestampController.text);
 
     // 타임스탬프 형식 검증
     if (newTimestamp == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('올바른 타임스탬프 형식을 입력하세요 (예: 1:23 또는 1:23:45)'),
+        SnackBar(
+          content: Text(l10n.errorTimestampInvalidFormat),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -342,8 +348,10 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '❌ 타임스탬프(${_formatDuration(newTimestamp)})가 '
-              '영상 길이(${_formatDuration(widget.video.durationSeconds!)})를 초과할 수 없습니다',
+              l10n.errorTimestampExceeds(
+                _formatDuration(newTimestamp),
+                _formatDuration(widget.video.durationSeconds!),
+              ),
             ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),

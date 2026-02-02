@@ -8,6 +8,7 @@ import '../widgets/category_selection_dialog.dart';
 import '../../../videos/presentation/screens/video_list_screen_brutalist.dart';
 import '../../../videos/presentation/providers/video_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 /// [CategoriesListScreenBrutalist] - Neo-Brutalist 디자인의 카테고리 메인 화면
 ///
@@ -69,6 +70,8 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     WidgetRef ref,
     AsyncValue categoriesAsync,
   ) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
       decoration: BoxDecoration(
@@ -107,7 +110,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'PAUSE IT',
+                      l10n.appTitle,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.w900,
                             color: AppTheme.textPrimary,
@@ -117,7 +120,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'TIMESTAMP ARCHIVE',
+                      l10n.appSubtitle,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: AppTheme.accentElectric,
                             letterSpacing: 3,
@@ -154,11 +157,12 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildStatsStrip] - 통계 정보 스트립
   Widget _buildStatsStrip(BuildContext context, int categoryCount) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         _buildStatBox(
           context: context,
-          label: 'CATEGORIES',
+          label: l10n.brutalistCategories,
           value: '$categoryCount',
           color: AppTheme.accentElectric,
         ),
@@ -287,6 +291,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildEmptyView] - 빈 화면
   Widget _buildEmptyView(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -321,7 +326,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             const SizedBox(height: 32),
 
             Text(
-              'NO CATEGORIES',
+              l10n.brutalistNoCategories,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: AppTheme.textPrimary,
@@ -342,7 +347,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                '카테고리를 추가하여\n유튜브 영상을 관리하세요',
+                l10n.brutalistNoCategoriesDesc,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppTheme.textSecondary,
                       height: 1.6,
@@ -358,6 +363,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildLoadingView] - 로딩 화면
   Widget _buildLoadingView(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -381,7 +387,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'LOADING...',
+            l10n.commonLoading,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppTheme.accentElectric,
                   letterSpacing: 2,
@@ -394,6 +400,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildErrorView] - 에러 화면
   Widget _buildErrorView(BuildContext context, String errorMessage) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -418,7 +425,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'ERROR',
+              l10n.commonError,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: AppTheme.error,
@@ -451,6 +458,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildBrutalistFAB] - Brutalist FAB
   Widget _buildBrutalistFAB(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return InkWell(
       onTap: () => _showAddCategoryDialog(context, ref),
       child: Container(
@@ -475,7 +483,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             const Icon(Icons.add, color: AppTheme.primaryDark, size: 24),
             const SizedBox(width: 8),
             Text(
-              'ADD',
+              l10n.brutalistAdd,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: AppTheme.primaryDark,
                     fontWeight: FontWeight.w900,
@@ -491,6 +499,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
   // ============ 액션 메서드들 ============
 
   void _showAddCategoryDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AddEditCategoryDialog(
@@ -504,14 +513,14 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           if (success) {
             _showBrutalistSnackbar(
               context,
-              'CATEGORY ADDED',
+              l10n.brutalistCategoryAdded,
               AppTheme.success,
               Icons.check_circle,
             );
           } else {
             _showBrutalistSnackbar(
               context,
-              'FAILED TO ADD',
+              l10n.brutalistFailedToAdd,
               AppTheme.error,
               Icons.error,
             );
@@ -526,6 +535,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     WidgetRef ref,
     Category category,
   ) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AddEditCategoryDialog(
@@ -548,14 +558,14 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           if (success) {
             _showBrutalistSnackbar(
               context,
-              'CATEGORY UPDATED',
+              l10n.brutalistCategoryUpdated,
               AppTheme.success,
               Icons.check_circle,
             );
           } else {
             _showBrutalistSnackbar(
               context,
-              'FAILED TO UPDATE',
+              l10n.brutalistFailedToUpdate,
               AppTheme.error,
               Icons.error,
             );
@@ -570,6 +580,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     WidgetRef ref,
     Category category,
   ) async {
+    final l10n = AppLocalizations.of(context);
     // 카테고리 개수 체크 - 1개면 삭제 불가
     final categoriesState = ref.read(categoryListProvider);
     final categoryCount = categoriesState.valueOrNull?.length ?? 0;
@@ -577,7 +588,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     if (categoryCount <= 1) {
       _showBrutalistSnackbar(
         context,
-        'CANNOT DELETE LAST CATEGORY',
+        l10n.brutalistCannotDeleteLast,
         AppTheme.warning,
         Icons.warning,
       );
@@ -592,14 +603,14 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     if (success) {
       _showBrutalistSnackbar(
         context,
-        'CATEGORY DELETED',
+        l10n.brutalistCategoryDeleted,
         AppTheme.success,
         Icons.check_circle,
       );
     } else {
       _showBrutalistSnackbar(
         context,
-        'FAILED TO DELETE',
+        l10n.brutalistFailedToDelete,
         AppTheme.error,
         Icons.error,
       );

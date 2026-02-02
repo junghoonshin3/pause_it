@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'generated/l10n/app_localizations.dart';
 import 'shared/data/database/database_helper.dart';
 import 'features/categories/presentation/screens/categories_list_screen_brutalist.dart';
 import 'features/videos/presentation/providers/video_provider.dart';
@@ -9,6 +11,7 @@ import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/config/flavor_config.dart';
 import 'core/config/app_config.dart';
+import 'core/providers/locale_provider.dart';
 
 /// [main] - 앱 진입점 (DEV 환경)
 ///
@@ -128,12 +131,41 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
+
     return MaterialApp(
       title: FlavorConfig.instance.appName,
       debugShowCheckedModeBanner: true, // DEV 환경: 디버그 배너 표시
       theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.dark,
+
+      // 다국어 설정
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: supportedLocales,
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        // 사용자가 언어를 명시적으로 설정한 경우
+        if (locale != null) return locale;
+
+        // 시스템 언어가 지원하는 언어 중 하나인 경우
+        if (deviceLocale != null) {
+          for (var supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == deviceLocale.languageCode) {
+              return supportedLocale;
+            }
+          }
+        }
+
+        // 기본값: 영어
+        return const Locale('en', 'US');
+      },
+
       home: const CategoriesListScreenBrutalist(),
     );
   }

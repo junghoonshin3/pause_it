@@ -6,6 +6,7 @@ import '../../../videos/domain/entities/shared_url_result.dart';
 import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/video_provider.dart';
 import '../../../../core/services/youtube_metadata_service.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 /// [CategorySelectionDialog] - 공유 영상 카테고리 선택 다이얼로그
 ///
@@ -23,9 +24,10 @@ class CategorySelectionDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categoriesAsync = ref.watch(categoryListProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      title: const Text('카테고리 선택'),
+      title: Text(l10n.categorySelectionTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -37,7 +39,7 @@ class CategorySelectionDialog extends ConsumerWidget {
             const Divider(),
             const SizedBox(height: 16),
             Text(
-              '어느 카테고리에 추가할까요?',
+              l10n.categorySelectionPrompt,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 12),
@@ -45,7 +47,7 @@ class CategorySelectionDialog extends ConsumerWidget {
             // 카테고리 목록
             categoriesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => const Text('카테고리를 불러올 수 없습니다'),
+              error: (error, stack) => Text(l10n.categorySelectionLoadError),
               data: (categories) {
                 if (categories.isEmpty) {
                   return _EmptyCategories(onCancel: onCancel);
@@ -63,7 +65,7 @@ class CategorySelectionDialog extends ConsumerWidget {
       actions: [
         TextButton(
           onPressed: onCancel,
-          child: const Text('취소'),
+          child: Text(l10n.commonButtonCancel),
         ),
       ],
     );
@@ -75,6 +77,7 @@ class CategorySelectionDialog extends ConsumerWidget {
     WidgetRef ref,
     Category category,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final newVideo = Video(
       id: null, // DB에서 자동 생성
@@ -108,14 +111,14 @@ class CategorySelectionDialog extends ConsumerWidget {
     if (savedVideo != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${category.name}에 영상이 추가되었습니다'),
+          content: Text(l10n.categorySelectionAddSuccess(category.name)),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('영상 추가에 실패했습니다'),
+        SnackBar(
+          content: Text(l10n.categorySelectionAddFailed),
           backgroundColor: Colors.red,
         ),
       );
@@ -225,20 +228,22 @@ class _EmptyCategories extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         const Icon(Icons.folder_off, size: 48, color: Colors.grey),
         const SizedBox(height: 8),
-        const Text('카테고리가 없습니다'),
+        Text(l10n.categorySelectionEmpty),
         const SizedBox(height: 4),
-        const Text(
-          '먼저 카테고리를 생성해주세요',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
+        Text(
+          l10n.categorySelectionEmptyDesc,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 16),
         TextButton(
           onPressed: onCancel,
-          child: const Text('확인'),
+          child: Text(l10n.commonButtonConfirm),
         ),
       ],
     );

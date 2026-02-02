@@ -1,0 +1,115 @@
+{
+  "@@locale": "ja",
+  "appTitle": "PAUSE IT",
+  "appSubtitle": "TIMESTAMP ARCHIVE",
+  "commonButtonAdd": "追加",
+  "commonButtonSave": "保存",
+  "commonButtonCancel": "キャンセル",
+  "commonButtonConfirm": "確認",
+  "commonButtonDelete": "削除",
+  "commonButtonEdit": "編集",
+  "commonLoading": "LOADING...",
+  "commonError": "ERROR",
+  "brutalistAdd": "ADD",
+  "brutalistCategories": "CATEGORIES",
+  "brutalistVideos": "VIDEOS",
+  "brutalistNoCategories": "NO CATEGORIES",
+  "brutalistNoCategoriesDesc": "カテゴリを追加して\nYouTube動画を管理しましょう",
+  "brutalistNoVideos": "NO VIDEOS",
+  "brutalistNoVideosDesc": "動画を追加して\nタイムスタンプを記録しましょう",
+  "brutalistCategoryAdded": "CATEGORY ADDED",
+  "brutalistCategoryUpdated": "CATEGORY UPDATED",
+  "brutalistCategoryDeleted": "CATEGORY DELETED",
+  "brutalistFailedToAdd": "FAILED TO ADD",
+  "brutalistFailedToUpdate": "FAILED TO UPDATE",
+  "brutalistFailedToDelete": "FAILED TO DELETE",
+  "brutalistCannotDeleteLast": "CANNOT DELETE LAST CATEGORY",
+  "brutalistVideoAdded": "VIDEO ADDED",
+  "brutalistVideoUpdated": "VIDEO UPDATED",
+  "brutalistVideoDeleted": "VIDEO DELETED",
+  "brutalistVideoMoved": "VIDEO MOVED",
+  "brutalistConfirmDelete": "CONFIRM DELETE",
+  "categoryAddTitle": "カテゴリを追加",
+  "categoryEditTitle": "カテゴリを編集",
+  "categoryNameLabel": "カテゴリ名",
+  "categoryNameHint": "例：開発講座、音楽、料理など",
+  "categoryColorLabel": "色を選択",
+  "categoryCurrentBadge": "現在",
+  "categoryErrorEmpty": "カテゴリ名を入力してください。",
+  "categoryErrorMinLength": "カテゴリ名は2文字以上である必要があります。",
+  "categoryDeleteConfirmTitle": "カテゴリを削除",
+  "categoryDeleteConfirmMessage": "{name}カテゴリを削除しますか？\n含まれるすべての動画も削除されます。",
+  "@categoryDeleteConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySelectionTitle": "カテゴリを選択",
+  "categorySelectionPrompt": "どのカテゴリに追加しますか？",
+  "categorySelectionAddSuccess": "{name}に動画が追加されました",
+  "@categorySelectionAddSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySelectionAddFailed": "動画の追加に失敗しました",
+  "categorySelectionEmpty": "カテゴリがありません",
+  "categorySelectionEmptyDesc": "まずカテゴリを作成してください",
+  "categorySelectionLoadError": "カテゴリを読み込めません",
+  "videoAddTitle": "動画を追加",
+  "videoEditTitle": "動画を編集",
+  "videoAddPrompt": "YouTube動画のURLを入力してください",
+  "videoUrlLabel": "YouTube URL",
+  "videoUrlHint": "https://www.youtube.com/watch?v=...",
+  "videoTimestampLabel": "タイムスタンプ（任意）",
+  "videoTimestampHint": "1:23 または 1:23:45",
+  "videoTimestampHelperDefault": "中断した時点を入力してください（デフォルト：0:00）",
+  "videoTimestampHelperWithMax": "中断した時点を入力してください（最大：{max}）",
+  "@videoTimestampHelperWithMax": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "videoTimestampHelperEdit": "中断した時点を入力してください",
+  "videoMemoLabel": "メモ（任意）",
+  "videoMemoHint": "この動画のメモを入力してください",
+  "videoMemoHelper": "後で思い出すことを書き留めましょう",
+  "videoCategoryLabel": "カテゴリ",
+  "videoCategoryMoveInfo": "保存時に動画が新しいカテゴリに移動します",
+  "videoLoadingMetadata": "動画情報を取得中...",
+  "videoDeleteConfirmTitle": "動画を削除",
+  "videoDeleteConfirmMessage": "この動画を削除しますか？",
+  "videoPlayButton": "再生",
+  "videoPlayWithTime": "タイムスタンプから再生",
+  "errorUrlEmpty": "URLを入力してください",
+  "errorUrlInvalid": "無効なYouTube URLです",
+  "errorNetwork": "ネットワークエラー：インターネット接続を確認してください",
+  "errorVideoNotFound": "動画が見つかりません（非公開/削除済み）",
+  "errorVideoMetadataFailed": "動画情報を取得できません",
+  "errorTimestampInvalidFormat": "正しいタイムスタンプ形式を入力してください（例：1:23 または 1:23:45）",
+  "errorTimestampExceeds": "タイムスタンプ（{timestamp}）が動画の長さ（{duration}）を超えることはできません",
+  "@errorTimestampExceeds": {
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "errorGeneric": "エラーが発生しました",
+  "notificationVideoAdded": "動画が追加されました",
+  "notificationVideoUpdated": "動画が更新されました",
+  "notificationVideoDeleted": "動画が削除されました",
+  "notificationCategoryAdded": "カテゴリが追加されました",
+  "notificationCategoryUpdated": "カテゴリが更新されました",
+  "notificationCategoryDeleted": "カテゴリが削除されました",
+  "notificationCannotDeleteLastCategory": "最後のカテゴリは削除できません"
+}

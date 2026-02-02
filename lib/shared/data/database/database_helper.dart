@@ -107,14 +107,14 @@ class DatabaseHelper {
 
   /// [_createDefaultCategory] - 기본 카테고리 생성
   ///
-  /// 앱 최초 실행 시 "기본" 카테고리를 자동으로 생성
+  /// 앱 최초 실행 시 "Default" 카테고리를 자동으로 생성
   /// 카테고리는 최소 1개 이상 있어야 하므로 필수
   Future<void> _createDefaultCategory(Database db) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     await db.insert(
       DatabaseConstants.tableCategories,
       {
-        'name': '기본',
+        'name': 'Default',
         'color_value': 0xFF2196F3, // 파란색
         'created_at': now,
         'updated_at': now,

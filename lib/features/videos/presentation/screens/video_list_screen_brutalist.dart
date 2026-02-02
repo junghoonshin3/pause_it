@@ -9,6 +9,7 @@ import '../widgets/video_card_brutalist.dart';
 import '../widgets/add_video_dialog.dart';
 import '../widgets/edit_video_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 /// [VideoListScreenBrutalist] - Neo-Brutalist 디자인의 영상 목록 화면
 ///
@@ -141,7 +142,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'VIDEOS',
+                      AppLocalizations.of(context).brutalistVideos,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: category.color,
                             letterSpacing: 2,
@@ -178,11 +179,12 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildStatsStrip] - 통계 정보 스트립
   Widget _buildStatsStrip(BuildContext context, List<Video> videos) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         _buildStatBox(
           context: context,
-          label: 'VIDEOS',
+          label: l10n.brutalistVideos,
           value: '${videos.length}',
           color: AppTheme.accentElectric,
         ),
@@ -289,6 +291,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildEmptyView] - 빈 화면 상태
   Widget _buildEmptyView(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -323,7 +326,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
             const SizedBox(height: 32),
 
             Text(
-              'NO VIDEOS',
+              l10n.brutalistNoVideos,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: AppTheme.textPrimary,
@@ -344,7 +347,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                '우측 하단 버튼을 눌러\nYouTube 영상을 추가해보세요',
+                l10n.brutalistNoVideosDesc,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppTheme.textSecondary,
                       height: 1.6,
@@ -360,6 +363,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildLoadingView] - 로딩 화면
   Widget _buildLoadingView(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -383,7 +387,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'LOADING...',
+            l10n.commonLoading,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppTheme.accentElectric,
                   letterSpacing: 2,
@@ -396,6 +400,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildErrorView] - 에러 화면
   Widget _buildErrorView(BuildContext context, String errorMessage) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -420,7 +425,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'ERROR',
+              l10n.commonError,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: AppTheme.error,
@@ -453,6 +458,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
   /// [_buildBrutalistFAB] - Brutalist FAB
   Widget _buildBrutalistFAB(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return InkWell(
       onTap: () => _showAddVideoDialog(context, ref),
       child: Container(
@@ -477,7 +483,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
             const Icon(Icons.add, color: AppTheme.primaryDark, size: 24),
             const SizedBox(width: 8),
             Text(
-              'ADD VIDEO',
+              l10n.brutalistAdd,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: AppTheme.primaryDark,
                     fontWeight: FontWeight.w900,
@@ -494,6 +500,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
   /// [_showAddVideoDialog] - 영상 추가 다이얼로그 표시
   void _showAddVideoDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AddVideoDialog(
@@ -520,14 +527,14 @@ class VideoListScreenBrutalist extends ConsumerWidget {
             if (!context.mounted) return;
             _showBrutalistSnackbar(
               context,
-              'VIDEO ADDED (REMINDER IN 10 MIN)',
+              l10n.brutalistVideoAdded,
               AppTheme.success,
               Icons.check_circle,
             );
           } else {
             _showBrutalistSnackbar(
               context,
-              'FAILED TO ADD VIDEO',
+              l10n.brutalistFailedToAdd,
               AppTheme.error,
               Icons.error,
             );
@@ -543,11 +550,12 @@ class VideoListScreenBrutalist extends ConsumerWidget {
     WidgetRef ref,
     Video video,
   ) {
+    final l10n = AppLocalizations.of(context);
     // 🔒 LAYER 1 VALIDATION: Check if category.id exists
     if (category.id == null) {
       _showBrutalistSnackbar(
         context,
-        'INVALID CATEGORY: CANNOT EDIT VIDEO',
+        l10n.commonError,
         AppTheme.error,
         Icons.error,
       );
@@ -577,14 +585,14 @@ class VideoListScreenBrutalist extends ConsumerWidget {
               ref.invalidate(videoCountProvider(updatedVideo.categoryId));
               _showBrutalistSnackbar(
                 context,
-                'VIDEO MOVED TO ANOTHER CATEGORY',
+                l10n.brutalistVideoMoved,
                 AppTheme.success,
                 Icons.check_circle,
               );
             } else {
               _showBrutalistSnackbar(
                 context,
-                'FAILED TO MOVE VIDEO',
+                l10n.brutalistFailedToUpdate,
                 AppTheme.error,
                 Icons.error,
               );
@@ -600,14 +608,14 @@ class VideoListScreenBrutalist extends ConsumerWidget {
             if (success) {
               _showBrutalistSnackbar(
                 context,
-                'VIDEO UPDATED',
+                l10n.brutalistVideoUpdated,
                 AppTheme.success,
                 Icons.check_circle,
               );
             } else {
               _showBrutalistSnackbar(
                 context,
-                'FAILED TO UPDATE VIDEO',
+                l10n.brutalistFailedToUpdate,
                 AppTheme.error,
                 Icons.error,
               );
@@ -624,6 +632,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
     WidgetRef ref,
     Video video,
   ) async {
+    final l10n = AppLocalizations.of(context);
     // 알림 취소
     final notificationService = ref.read(notificationServiceProvider);
     await notificationService.cancelNotification(video.id!);
@@ -638,14 +647,14 @@ class VideoListScreenBrutalist extends ConsumerWidget {
     if (success) {
       _showBrutalistSnackbar(
         context,
-        'VIDEO DELETED',
+        l10n.brutalistVideoDeleted,
         AppTheme.success,
         Icons.check_circle,
       );
     } else {
       _showBrutalistSnackbar(
         context,
-        'FAILED TO DELETE VIDEO',
+        l10n.brutalistFailedToDelete,
         AppTheme.error,
         Icons.error,
       );
@@ -654,6 +663,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
   /// [_playVideo] - YouTube 영상 재생
   Future<void> _playVideo(BuildContext context, Video video) async {
+    final l10n = AppLocalizations.of(context);
     try {
       // YouTube URL 생성 (타임스탬프 포함)
       final url = Uri.parse(
@@ -680,7 +690,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
         if (!browserLaunched) {
           _showBrutalistSnackbar(
             context,
-            'CANNOT OPEN YOUTUBE',
+            l10n.commonError,
             AppTheme.error,
             Icons.error,
           );
@@ -690,7 +700,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
       if (!context.mounted) return;
       _showBrutalistSnackbar(
         context,
-        'FAILED TO PLAY VIDEO',
+        l10n.commonError,
         AppTheme.error,
         Icons.error,
       );

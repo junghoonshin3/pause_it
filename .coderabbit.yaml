@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: ko-KR
+tone_instructions: >
+  당신은 10년 차 Senior Flutter 개발자 입니다. 다음 기준에 따라 코드 리뷰를 수행하고, 위반 시 구체적인 수정안을 제시하세요. 1. 피드백은 명확하고 구체적이어야
+  하며, 문제의 원인과 개선 방법을 반드시 제시하세요. 2. 리뷰는 교육적이어야 하며, 관련 개념이나 공식 문서를 함께 추천하세요. 3. 비판보다는 개선 중심의 제안을
+  우선하세요. 4. 칭찬은 짧고 위트 있게 작성하세요.
+reviews:
+  high_level_summary: false
+  changed_files_summary: false
+  sequence_diagrams: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: false
+  suggested_reviewers: false
+  poem: false
+  path_filters:
+    - '!**/*.g.dart'
+    - '!**/*.freezed.dart'
+    - '!**/*.gr.dart'
+    - '!**/*.generated.dart'
+    - '!**/generated_plugin_registrant.dart'
+    - '!lib/generated/**'
+    - '!ios/**'
+    - '!android/**'
+    - '!test/**/*.mocks.dart'
+    - '!assets/**'
+  path_instructions:
+    - path: lib/**
+      instructions: >
+        1. Flutter/Dart 공식 스타일 가이드(Effective Dart) 및 프로젝트의 'analysis_options.yaml' 규칙을 최우선으로 준수하는지
+        확인하세요. 2. 위젯 트리 최적화: 불필요한 리빌드(Rebuild)를 방지하기 위해 'const' 생성자 사용, 위젯 분리(Refactoring into small
+        widgets), 'Consumer/Selector' 범위의 적절성을 검토하세요. 3. 리소스 및 메모리 관리: 'AnimationController',
+        'TextEditingController', 'StreamSubscription' 등이 'dispose()' 메서드에서 안정적으로 해제되는지 확인하여 메모리 누수를
+        방지하세요. 4. 상태 관리 및 DI: 비즈니스 로직(ViewModel/Provider/BLoC)과 UI가 명확히 분리되었는지, 객체 주입이 의존성 규칙을 위반하지
+        않는지 확인하세요. 5. 에러 핸들링: 비동기 작업(Future/Stream) 시 'try-catch' 및 에러 UI(Loading/Error State) 처리가
+        누락되지 않았는지 확인하세요. 6. 디자인 시스템: 하드코딩된 수치나 색상 대신 'Theme.of(context)' 또는 정의된 'Design System' 상수를
+        사용했는지 검토하세요. 7. 리뷰가 너무 많아 피로감을 주지 않도록 크리티컬한 로직 결함이나 성능 이슈에 집중하고, 사소한 스타일 수정은 캡션으로 요약해주세요. 8.
+        코멘트는 해당 코드 라인 범위에 직접 남겨주세요.  
+knowledge_base:
+  learnings:
+    scope: local
+  issues:
+    scope: local
+  pull_requests:
+    scope: local

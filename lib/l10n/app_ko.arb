@@ -1,0 +1,115 @@
+{
+  "@@locale": "ko",
+  "appTitle": "PAUSE IT",
+  "appSubtitle": "TIMESTAMP ARCHIVE",
+  "commonButtonAdd": "추가",
+  "commonButtonSave": "저장",
+  "commonButtonCancel": "취소",
+  "commonButtonConfirm": "확인",
+  "commonButtonDelete": "삭제",
+  "commonButtonEdit": "편집",
+  "commonLoading": "LOADING...",
+  "commonError": "ERROR",
+  "brutalistAdd": "ADD",
+  "brutalistCategories": "CATEGORIES",
+  "brutalistVideos": "VIDEOS",
+  "brutalistNoCategories": "NO CATEGORIES",
+  "brutalistNoCategoriesDesc": "카테고리를 추가하여\n유튜브 영상을 관리하세요",
+  "brutalistNoVideos": "NO VIDEOS",
+  "brutalistNoVideosDesc": "영상을 추가하여\n타임스탬프를 기록하세요",
+  "brutalistCategoryAdded": "CATEGORY ADDED",
+  "brutalistCategoryUpdated": "CATEGORY UPDATED",
+  "brutalistCategoryDeleted": "CATEGORY DELETED",
+  "brutalistFailedToAdd": "FAILED TO ADD",
+  "brutalistFailedToUpdate": "FAILED TO UPDATE",
+  "brutalistFailedToDelete": "FAILED TO DELETE",
+  "brutalistCannotDeleteLast": "CANNOT DELETE LAST CATEGORY",
+  "brutalistVideoAdded": "VIDEO ADDED",
+  "brutalistVideoUpdated": "VIDEO UPDATED",
+  "brutalistVideoDeleted": "VIDEO DELETED",
+  "brutalistVideoMoved": "VIDEO MOVED",
+  "brutalistConfirmDelete": "CONFIRM DELETE",
+  "categoryAddTitle": "카테고리 추가",
+  "categoryEditTitle": "카테고리 편집",
+  "categoryNameLabel": "카테고리 이름",
+  "categoryNameHint": "예: 개발 강의, 음악, 요리 등",
+  "categoryColorLabel": "색상 선택",
+  "categoryCurrentBadge": "현재",
+  "categoryErrorEmpty": "카테고리 이름을 입력해주세요.",
+  "categoryErrorMinLength": "카테고리 이름은 최소 2자 이상이어야 합니다.",
+  "categoryDeleteConfirmTitle": "카테고리 삭제",
+  "categoryDeleteConfirmMessage": "{name} 카테고리를 삭제하시겠습니까?\n포함된 모든 영상도 함께 삭제됩니다.",
+  "@categoryDeleteConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySelectionTitle": "카테고리 선택",
+  "categorySelectionPrompt": "어느 카테고리에 추가할까요?",
+  "categorySelectionAddSuccess": "{name}에 영상이 추가되었습니다",
+  "@categorySelectionAddSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySelectionAddFailed": "영상 추가에 실패했습니다",
+  "categorySelectionEmpty": "카테고리가 없습니다",
+  "categorySelectionEmptyDesc": "먼저 카테고리를 생성해주세요",
+  "categorySelectionLoadError": "카테고리를 불러올 수 없습니다",
+  "videoAddTitle": "영상 추가",
+  "videoEditTitle": "영상 편집",
+  "videoAddPrompt": "YouTube 영상 URL을 입력하세요",
+  "videoUrlLabel": "YouTube URL",
+  "videoUrlHint": "https://www.youtube.com/watch?v=...",
+  "videoTimestampLabel": "타임스탬프 (선택)",
+  "videoTimestampHint": "1:23 또는 1:23:45",
+  "videoTimestampHelperDefault": "중단한 시점을 입력하세요 (기본값: 0:00)",
+  "videoTimestampHelperWithMax": "중단한 시점을 입력하세요 (최대: {max})",
+  "@videoTimestampHelperWithMax": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "videoTimestampHelperEdit": "중단한 시점을 입력하세요",
+  "videoMemoLabel": "메모 (선택)",
+  "videoMemoHint": "이 영상에 대한 메모를 입력하세요",
+  "videoMemoHelper": "나중에 기억할 내용을 적어두세요",
+  "videoCategoryLabel": "카테고리",
+  "videoCategoryMoveInfo": "저장 시 영상이 새 카테고리로 이동됩니다",
+  "videoLoadingMetadata": "영상 정보를 가져오는 중...",
+  "videoDeleteConfirmTitle": "영상 삭제",
+  "videoDeleteConfirmMessage": "이 영상을 삭제하시겠습니까?",
+  "videoPlayButton": "재생",
+  "videoPlayWithTime": "타임스탬프에서 재생",
+  "errorUrlEmpty": "URL을 입력해주세요",
+  "errorUrlInvalid": "유효하지 않은 YouTube URL입니다",
+  "errorNetwork": "네트워크 오류: 인터넷 연결을 확인해주세요",
+  "errorVideoNotFound": "영상을 찾을 수 없습니다 (비공개/삭제됨)",
+  "errorVideoMetadataFailed": "영상 정보를 가져올 수 없습니다",
+  "errorTimestampInvalidFormat": "올바른 타임스탬프 형식을 입력하세요 (예: 1:23 또는 1:23:45)",
+  "errorTimestampExceeds": "타임스탬프({timestamp})가 영상 길이({duration})를 초과할 수 없습니다",
+  "@errorTimestampExceeds": {
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "errorGeneric": "오류가 발생했습니다",
+  "notificationVideoAdded": "영상이 추가되었습니다",
+  "notificationVideoUpdated": "영상이 수정되었습니다",
+  "notificationVideoDeleted": "영상이 삭제되었습니다",
+  "notificationCategoryAdded": "카테고리가 추가되었습니다",
+  "notificationCategoryUpdated": "카테고리가 수정되었습니다",
+  "notificationCategoryDeleted": "카테고리가 삭제되었습니다",
+  "notificationCannotDeleteLastCategory": "마지막 카테고리는 삭제할 수 없습니다"
+}

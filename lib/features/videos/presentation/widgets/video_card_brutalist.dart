@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/video.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 /// [VideoCardBrutalist] - Neo-Brutalist 스타일 영상 카드
 ///
@@ -624,6 +625,8 @@ class _VideoCardBrutalistState extends State<VideoCardBrutalist>
 
   /// [_showDeleteConfirmation] - 삭제 확인 다이얼로그
   void _showDeleteConfirmation(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -651,7 +654,7 @@ class _VideoCardBrutalistState extends State<VideoCardBrutalist>
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'DELETE VIDEO',
+                    l10n.brutalistConfirmDelete,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: AppTheme.accentNeon,
@@ -665,7 +668,7 @@ class _VideoCardBrutalistState extends State<VideoCardBrutalist>
 
               // 메시지
               Text(
-                '이 영상을 삭제하시겠습니까?',
+                l10n.videoDeleteConfirmMessage,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       height: 1.6,
                     ),
@@ -741,7 +744,7 @@ class _VideoCardBrutalistState extends State<VideoCardBrutalist>
                   Expanded(
                     child: _buildDialogButton(
                       context: context,
-                      label: 'CANCEL',
+                      label: l10n.commonButtonCancel.toUpperCase(),
                       color: AppTheme.textSecondary,
                       onPressed: () => Navigator.pop(context),
                     ),
@@ -750,7 +753,7 @@ class _VideoCardBrutalistState extends State<VideoCardBrutalist>
                   Expanded(
                     child: _buildDialogButton(
                       context: context,
-                      label: 'DELETE',
+                      label: l10n.commonButtonDelete.toUpperCase(),
                       color: AppTheme.accentNeon,
                       onPressed: () {
                         Navigator.pop(context);

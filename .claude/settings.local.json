@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(flutter analyze:*)",
-      "Bash(flutter pub get:*)"
+      "Bash(flutter pub get:*)",
+      "Bash(git push:*)",
+      "Bash(git -C /Users/junghoon/Documents/develop/flutter_project/pause_it branch -a)",
+      "Bash(chmod:*)",
+      "Bash(flutter pub run:*)",
+      "Bash(flutter build:*)",
+      "Bash(wc:*)"
     ]
   }
 }

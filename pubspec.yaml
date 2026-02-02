@@ -89,15 +89,15 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/youtube_saver_icon_prod.png"
+  image_path: "assets/yt_timestamp_brutalist_prod.png"
 
   # DEV Flavor
   android_flavor_dev:
-    image_path: "assets/youtube_saver_icon_dev.png"
+    image_path: "assets/yt_timestamp_brutalist_dev.png"
 
   # PROD Flavor
   android_flavor_prod:
-    image_path: "assets/youtube_saver_icon_prod.png"
+    image_path: "assets/yt_timestamp_brutalist_prod.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

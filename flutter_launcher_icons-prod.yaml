@@ -1,9 +1,9 @@
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/youtube_saver_icon_prod.png"
+  image_path: "assets/yt_timestamp_brutalist_prod.png"
   adaptive_icon_background: "#FFFFFF"  # Prod용 흰색 배경
-  adaptive_icon_foreground: "assets/youtube_saver_icon_prod.png"
+  adaptive_icon_foreground: "assets/yt_timestamp_brutalist_prod.png"
 
   # Android flavor 설정
   flavor: "prod"

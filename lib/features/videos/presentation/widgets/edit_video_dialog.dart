@@ -105,10 +105,10 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
                     ? l10n.videoTimestampHelperWithMax(_formatDuration(widget.video.durationSeconds!))
                     : l10n.videoTimestampHelperEdit,
               ),
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.text,
               textInputAction: TextInputAction.next,
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9:thms=]')),
                 _TimeStampInputFormatter(),
               ],
             ),
@@ -417,25 +417,42 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
 
   /// [_parseDuration] - 시간 문자열을 초로 변환
   ///
-  /// Parameters:
-  /// - [input]: "M:SS" 또는 "H:MM:SS" 형식의 문자열
+  /// 지원 형식:
+  /// - MM:SS (예: 1:23 → 83초)
+  /// - HH:MM:SS (예: 1:23:45 → 5025초)
+  /// - YouTube 스타일: t=70s, t=1m10s, 70s, 1m10s, 1h2m30s 등
   ///
   /// Returns: 초 단위의 정수, 파싱 실패 시 null
   int? _parseDuration(String input) {
     try {
-      final parts = input.trim().split(':');
+      // 앞뒤 공백 제거 및 앞의 "t=" 제거
+      var text = input.trim();
+      if (text.startsWith('t=')) {
+        text = text.substring(2);
+      }
+
+      // YouTube 스타일 형식: Xh, Xm, Xs 조합
+      final youtubePattern = RegExp(r'^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$');
+      final youtubeMatch = youtubePattern.firstMatch(text);
+      if (youtubeMatch != null && youtubeMatch[0]!.isNotEmpty) {
+        final hours = int.parse(youtubeMatch[1] ?? '0');
+        final minutes = int.parse(youtubeMatch[2] ?? '0');
+        final seconds = int.parse(youtubeMatch[3] ?? '0');
+        return hours * 3600 + minutes * 60 + seconds;
+      }
+
+      // 기존 형식: MM:SS / HH:MM:SS
+      final parts = text.split(':');
       if (parts.isEmpty || parts.any((p) => p.isEmpty)) {
         return null;
       }
 
       if (parts.length == 2) {
-        // MM:SS
         final minutes = int.parse(parts[0]);
         final seconds = int.parse(parts[1]);
         if (seconds >= 60) return null; // 초는 0~59
         return minutes * 60 + seconds;
       } else if (parts.length == 3) {
-        // HH:MM:SS
         final hours = int.parse(parts[0]);
         final minutes = int.parse(parts[1]);
         final seconds = int.parse(parts[2]);
@@ -452,9 +469,9 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
 /// [_TimeStampInputFormatter] - 타임스탬프 입력 포맷터
 ///
 /// 주요 기능:
-/// - 숫자와 콜론(:)만 입력 가능
+/// - MM:SS / HH:MM:SS 형식과 YouTube 스타일(t=Xh Ym Zs) 모두 허용
 /// - 연속된 콜론(::) 방지
-/// - 최대 2개의 콜론까지만 허용 (HH:MM:SS 형식)
+/// - 콜론 형식 시 최대 2개의 콜론까지만 허용
 class _TimeStampInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -465,6 +482,11 @@ class _TimeStampInputFormatter extends TextInputFormatter {
 
     // 빈 문자열은 허용
     if (text.isEmpty) return newValue;
+
+    // YouTube 스타일 형식 입력 중인 경우 콜론 관련 검증 건너뛰기
+    if (text.contains('h') || text.contains('m') || text.contains('s') || text.contains('=')) {
+      return newValue;
+    }
 
     // 연속된 콜론 방지
     if (text.contains('::')) {

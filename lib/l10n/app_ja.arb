@@ -66,8 +66,8 @@
   "videoUrlLabel": "YouTube URL",
   "videoUrlHint": "https://www.youtube.com/watch?v=...",
   "videoTimestampLabel": "タイムスタンプ（任意）",
-  "videoTimestampHint": "1:23 または 1:23:45",
-  "videoTimestampHelperDefault": "中断した時点を入力してください（デフォルト：0:00）",
+  "videoTimestampHint": "1:23, 1:23:45, 1m23s, t=70s",
+  "videoTimestampHelperDefault": "中断した時点を入力してください（デフォルト：0:00、例：1m30s）",
   "videoTimestampHelperWithMax": "中断した時点を入力してください（最大：{max}）",
   "@videoTimestampHelperWithMax": {
     "placeholders": {
@@ -92,7 +92,7 @@
   "errorNetwork": "ネットワークエラー：インターネット接続を確認してください",
   "errorVideoNotFound": "動画が見つかりません（非公開/削除済み）",
   "errorVideoMetadataFailed": "動画情報を取得できません",
-  "errorTimestampInvalidFormat": "正しいタイムスタンプ形式を入力してください（例：1:23 または 1:23:45）",
+  "errorTimestampInvalidFormat": "正しいタイムスタンプ形式を入力してください（例：1:23, 1:23:45, 1m30s, t=70s）",
   "errorTimestampExceeds": "タイムスタンプ（{timestamp}）が動画の長さ（{duration}）を超えることはできません",
   "@errorTimestampExceeds": {
     "placeholders": {

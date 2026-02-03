@@ -240,16 +240,36 @@ class _AddVideoDialogState extends ConsumerState<AddVideoDialog> {
   }
 
   /// [_parseDuration] - 시간 문자열을 초로 변환
+  ///
+  /// 지원 형식:
+  /// - MM:SS (예: 1:23 → 83초)
+  /// - HH:MM:SS (예: 1:23:45 → 5025초)
+  /// - YouTube 스타일: t=70s, t=1m10s, 70s, 1m10s, 1h2m30s 등
   int? _parseDuration(String input) {
     try {
-      final parts = input.trim().split(':');
+      // 앞뒤 공백 제거 및 앞의 "t=" 제거
+      var text = input.trim();
+      if (text.startsWith('t=')) {
+        text = text.substring(2);
+      }
+
+      // YouTube 스타일 형식: Xh, Xm, Xs 조합
+      final youtubePattern = RegExp(r'^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$');
+      final youtubeMatch = youtubePattern.firstMatch(text);
+      if (youtubeMatch != null && youtubeMatch[0]!.isNotEmpty) {
+        final hours = int.parse(youtubeMatch[1] ?? '0');
+        final minutes = int.parse(youtubeMatch[2] ?? '0');
+        final seconds = int.parse(youtubeMatch[3] ?? '0');
+        return hours * 3600 + minutes * 60 + seconds;
+      }
+
+      // 기존 형식: MM:SS / HH:MM:SS
+      final parts = text.split(':');
       if (parts.length == 2) {
-        // MM:SS
         final minutes = int.parse(parts[0]);
         final seconds = int.parse(parts[1]);
         return minutes * 60 + seconds;
       } else if (parts.length == 3) {
-        // HH:MM:SS
         final hours = int.parse(parts[0]);
         final minutes = int.parse(parts[1]);
         final seconds = int.parse(parts[2]);

@@ -56,7 +56,9 @@ class NotificationService {
   /// Android/iOS 플랫폼별 설정 및 알림 채널 생성
   Future<void> initialize() async {
     // Android 초기화 설정
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
     // iOS 초기화 설정
     const iosSettings = DarwinInitializationSettings(
@@ -87,7 +89,8 @@ class NotificationService {
 
     await _notifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(androidChannel);
 
     print('✅ NotificationService 초기화 완료');
@@ -159,35 +162,39 @@ class NotificationService {
   ///
   /// 영상이 추가될 때마다 기존 summary를 취소하고 새로운 시간으로 재스케줄
   /// payload=null이므로 탭하면 앱만 열림 (YouTube 실행 안 됨)
-  Future<void> _scheduleOrUpdateGroupSummary(tz.TZDateTime scheduledDate) async {
-    // 기존 group summary 취소 (같은 ID 중복 방지)
-    await _notifications.cancel(_groupSummaryId);
-
-    // group summary 스케줄
-    await _notifications.zonedSchedule(
-      _groupSummaryId,
-      '나중에 보려던 영상이 있어요! 🎬',
-      '저장한 영상을 이어서 보기',
-      scheduledDate,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          'video_reminder',
-          '영상 알림',
-          channelDescription: '나중에 보려던 영상을 알려드립니다',
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
-          groupKey: _groupKey,
-          setAsGroupSummary: true,
+  Future<void> _scheduleOrUpdateGroupSummary(
+    tz.TZDateTime scheduledDate,
+  ) async {
+    try {
+      // 기존 group summary 취소 (같은 ID 중복 방지)
+      await _notifications.cancel(_groupSummaryId);
+      // group summary 스케줄
+      await _notifications.zonedSchedule(
+        _groupSummaryId,
+        '나중에 보려던 영상이 있어요! 🎬',
+        '저장한 영상을 이어서 보기',
+        scheduledDate,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'video_reminder',
+            '영상 알림',
+            channelDescription: '나중에 보려던 영상을 알려드립니다',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            groupKey: _groupKey,
+            setAsGroupSummary: true,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: null, // 탭 시 앱만 열림
-    );
-
-    print('✅ 그룹 summary 갱신: 발송시간=$scheduledDate');
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: null, // 탭 시 앱만 열림
+      );
+      print('✅ 그룹 summary 갱신: 발송시간=$scheduledDate');
+    } catch (e) {
+      print('❌ 그룹 summary 갱신 실패: $e');
+    }
   }
 
   /// [cancelNotification] - 알림 취소
@@ -206,8 +213,9 @@ class NotificationService {
       if (Platform.isAndroid) {
         final pending = await _notifications.pendingNotificationRequests();
         // _groupSummaryId(0)을 제외한 예약 알림이 남아있지 않으면 summary 취소
-        final hasRemainingVideoAlarms =
-            pending.any((n) => n.id != _groupSummaryId);
+        final hasRemainingVideoAlarms = pending.any(
+          (n) => n.id != _groupSummaryId,
+        );
         if (!hasRemainingVideoAlarms) {
           await _notifications.cancel(_groupSummaryId);
           print('🗑️ 그룹 summary 취소 (남은 영상 알림 없음)');
@@ -266,16 +274,18 @@ class NotificationService {
       // Android 플러그인 인스턴스
       final androidPlugin = _notifications
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+            AndroidFlutterLocalNotificationsPlugin
+          >();
 
       // iOS 플러그인 인스턴스
       final iosPlugin = _notifications
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
+            IOSFlutterLocalNotificationsPlugin
+          >();
 
       // Android 알림 권한 요청 (Android 13+)
-      bool? androidGranted =
-          await androidPlugin?.requestNotificationsPermission();
+      bool? androidGranted = await androidPlugin
+          ?.requestNotificationsPermission();
 
       // iOS 알림 권한 요청
       bool? iosGranted = await iosPlugin?.requestPermissions(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/video.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 
 /// [VideoCard] - 영상 카드 위젯
 ///
@@ -78,7 +79,7 @@ class VideoCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _formatDuration(video.timestampSeconds),
+                        TimestampUtils.formatDuration(video.timestampSeconds),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold,
@@ -86,7 +87,7 @@ class VideoCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '/ ${_formatDuration(video.durationSeconds)}',
+                        '/ ${TimestampUtils.formatDuration(video.durationSeconds)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color:
                                   Theme.of(context).colorScheme.onSurfaceVariant,
@@ -166,7 +167,7 @@ class VideoCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              _formatDuration(video.durationSeconds),
+              TimestampUtils.formatDuration(video.durationSeconds),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -330,42 +331,4 @@ class VideoCard extends StatelessWidget {
     );
   }
 
-  /// [_formatDuration] - 초를 시간 형식으로 변환 (MM:SS 또는 HH:MM:SS)
-  String _formatDuration(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
-    final secs = seconds % 60;
-
-    if (hours > 0) {
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
-    } else {
-      return '$minutes:${secs.toString().padLeft(2, '0')}';
-    }
-  }
-
-  /// [_parseDuration] - 시간 문자열을 초로 변환
-  ///
-  /// 지원 형식:
-  /// - "1:23" -> 83초
-  /// - "1:23:45" -> 5025초
-  int? _parseDuration(String input) {
-    try {
-      final parts = input.trim().split(':');
-      if (parts.length == 2) {
-        // MM:SS
-        final minutes = int.parse(parts[0]);
-        final seconds = int.parse(parts[1]);
-        return minutes * 60 + seconds;
-      } else if (parts.length == 3) {
-        // HH:MM:SS
-        final hours = int.parse(parts[0]);
-        final minutes = int.parse(parts[1]);
-        final seconds = int.parse(parts[2]);
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
 }

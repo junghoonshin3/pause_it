@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/video.dart';
 import '../../domain/usecases/get_video_metadata.dart';
 import '../providers/video_provider.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [AddVideoDialog] - 영상 추가 다이얼로그
@@ -200,7 +201,7 @@ class _AddVideoDialogState extends ConsumerState<AddVideoDialog> {
         timestampSeconds = parsedUrl.timestampSeconds;
       } else {
         // 사용자가 입력한 타임스탬프 사용
-        timestampSeconds = _parseDuration(_timestampController.text) ?? 0;
+        timestampSeconds = TimestampUtils.parseDuration(_timestampController.text) ?? 0;
       }
 
       // 4. Video 객체 생성
@@ -236,48 +237,6 @@ class _AddVideoDialogState extends ConsumerState<AddVideoDialog> {
         _isLoading = false;
         _errorMessage = _getErrorMessage(e.toString());
       });
-    }
-  }
-
-  /// [_parseDuration] - 시간 문자열을 초로 변환
-  ///
-  /// 지원 형식:
-  /// - MM:SS (예: 1:23 → 83초)
-  /// - HH:MM:SS (예: 1:23:45 → 5025초)
-  /// - YouTube 스타일: t=70s, t=1m10s, 70s, 1m10s, 1h2m30s 등
-  int? _parseDuration(String input) {
-    try {
-      // 앞뒤 공백 제거 및 앞의 "t=" 제거
-      var text = input.trim();
-      if (text.startsWith('t=')) {
-        text = text.substring(2);
-      }
-
-      // YouTube 스타일 형식: Xh, Xm, Xs 조합
-      final youtubePattern = RegExp(r'^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$');
-      final youtubeMatch = youtubePattern.firstMatch(text);
-      if (youtubeMatch != null && youtubeMatch[0]!.isNotEmpty) {
-        final hours = int.parse(youtubeMatch[1] ?? '0');
-        final minutes = int.parse(youtubeMatch[2] ?? '0');
-        final seconds = int.parse(youtubeMatch[3] ?? '0');
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-
-      // 기존 형식: MM:SS / HH:MM:SS
-      final parts = text.split(':');
-      if (parts.length == 2) {
-        final minutes = int.parse(parts[0]);
-        final seconds = int.parse(parts[1]);
-        return minutes * 60 + seconds;
-      } else if (parts.length == 3) {
-        final hours = int.parse(parts[0]);
-        final minutes = int.parse(parts[1]);
-        final seconds = int.parse(parts[2]);
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-      return 0;
-    } catch (e) {
-      return 0;
     }
   }
 

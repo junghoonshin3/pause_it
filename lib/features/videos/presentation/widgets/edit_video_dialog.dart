@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../domain/entities/video.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [EditVideoDialog] - 영상 편집 다이얼로그
@@ -58,7 +59,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
     super.initState();
     // 기존 값으로 초기화
     _timestampController = TextEditingController(
-      text: _formatDuration(widget.video.timestampSeconds),
+      text: TimestampUtils.formatDuration(widget.video.timestampSeconds),
     );
     _memoController = TextEditingController(
       text: widget.video.memo ?? '',
@@ -102,7 +103,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.access_time),
                 helperText: widget.video.durationSeconds != null
-                    ? l10n.videoTimestampHelperWithMax(_formatDuration(widget.video.durationSeconds!))
+                    ? l10n.videoTimestampHelperWithMax(TimestampUtils.formatDuration(widget.video.durationSeconds!))
                     : l10n.videoTimestampHelperEdit,
               ),
               keyboardType: TextInputType.text,
@@ -324,7 +325,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     // 타임스탬프 파싱 (초 단위로 변환)
-    final newTimestamp = _parseDuration(_timestampController.text);
+    final newTimestamp = TimestampUtils.parseDuration(_timestampController.text);
 
     // 타임스탬프 형식 검증
     if (newTimestamp == null) {
@@ -349,8 +350,8 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
           SnackBar(
             content: Text(
               l10n.errorTimestampExceeds(
-                _formatDuration(newTimestamp),
-                _formatDuration(widget.video.durationSeconds!),
+                TimestampUtils.formatDuration(newTimestamp),
+                TimestampUtils.formatDuration(widget.video.durationSeconds!),
               ),
             ),
             backgroundColor: Colors.red,
@@ -398,72 +399,6 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
     Navigator.pop(context);
   }
 
-  /// [_formatDuration] - 초를 시간 문자열로 변환
-  ///
-  /// Parameters:
-  /// - [seconds]: 변환할 초
-  ///
-  /// Returns: "M:SS" 또는 "H:MM:SS" 형식의 문자열
-  String _formatDuration(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
-    final secs = seconds % 60;
-
-    if (hours > 0) {
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
-    }
-    return '$minutes:${secs.toString().padLeft(2, '0')}';
-  }
-
-  /// [_parseDuration] - 시간 문자열을 초로 변환
-  ///
-  /// 지원 형식:
-  /// - MM:SS (예: 1:23 → 83초)
-  /// - HH:MM:SS (예: 1:23:45 → 5025초)
-  /// - YouTube 스타일: t=70s, t=1m10s, 70s, 1m10s, 1h2m30s 등
-  ///
-  /// Returns: 초 단위의 정수, 파싱 실패 시 null
-  int? _parseDuration(String input) {
-    try {
-      // 앞뒤 공백 제거 및 앞의 "t=" 제거
-      var text = input.trim();
-      if (text.startsWith('t=')) {
-        text = text.substring(2);
-      }
-
-      // YouTube 스타일 형식: Xh, Xm, Xs 조합
-      final youtubePattern = RegExp(r'^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$');
-      final youtubeMatch = youtubePattern.firstMatch(text);
-      if (youtubeMatch != null && youtubeMatch[0]!.isNotEmpty) {
-        final hours = int.parse(youtubeMatch[1] ?? '0');
-        final minutes = int.parse(youtubeMatch[2] ?? '0');
-        final seconds = int.parse(youtubeMatch[3] ?? '0');
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-
-      // 기존 형식: MM:SS / HH:MM:SS
-      final parts = text.split(':');
-      if (parts.isEmpty || parts.any((p) => p.isEmpty)) {
-        return null;
-      }
-
-      if (parts.length == 2) {
-        final minutes = int.parse(parts[0]);
-        final seconds = int.parse(parts[1]);
-        if (seconds >= 60) return null; // 초는 0~59
-        return minutes * 60 + seconds;
-      } else if (parts.length == 3) {
-        final hours = int.parse(parts[0]);
-        final minutes = int.parse(parts[1]);
-        final seconds = int.parse(parts[2]);
-        if (minutes >= 60 || seconds >= 60) return null; // 분, 초는 0~59
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
 }
 
 /// [_TimeStampInputFormatter] - 타임스탬프 입력 포맷터

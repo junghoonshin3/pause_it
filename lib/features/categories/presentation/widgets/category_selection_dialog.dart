@@ -7,6 +7,7 @@ import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/notification_provider.dart';
 import '../../../videos/presentation/providers/video_provider.dart';
 import '../../../../core/services/youtube_metadata_service.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [CategorySelectionDialog] - 공유 영상 카테고리 선택 다이얼로그
@@ -38,7 +39,7 @@ class _CategorySelectionDialogState
     // URL에 타임스탬프가 포함된 경우 포맷된 값으로 초기화, 아니면 기본값 0:00
     final initialSeconds = widget.sharedUrlResult.timestampSeconds;
     _timestampController = TextEditingController(
-      text: initialSeconds > 0 ? _formatDuration(initialSeconds) : '0:00',
+      text: initialSeconds > 0 ? TimestampUtils.formatDuration(initialSeconds) : '0:00',
     );
   }
 
@@ -51,7 +52,7 @@ class _CategorySelectionDialogState
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoryListProvider);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
       title: Text(l10n.categorySelectionTitle),
@@ -114,11 +115,11 @@ class _CategorySelectionDialogState
 
   /// [_addToCategory] - 선택한 카테고리에 영상 추가
   Future<void> _addToCategory(Category category) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
 
     // 사용자가 입력한 타임스탬프 파싱
-    final timestampSeconds = _parseDuration(_timestampController.text) ?? 0;
+    final timestampSeconds = TimestampUtils.parseDuration(_timestampController.text) ?? 0;
 
     final newVideo = Video(
       id: null, // DB에서 자동 생성
@@ -152,13 +153,18 @@ class _CategorySelectionDialogState
     if (savedVideo != null) {
       // 저장된 영상에 대해 리마인더 알림 스케줄
       if (savedVideo.id != null) {
-        final notificationService = ref.read(notificationServiceProvider);
-        await notificationService.scheduleVideoReminder(
-          videoId: savedVideo.id!,
-          videoTitle: savedVideo.title,
-          youtubeVideoId: savedVideo.youtubeVideoId,
-          timestampSeconds: savedVideo.timestampSeconds,
-        );
+        try {
+          final notificationService = ref.read(notificationServiceProvider);
+          await notificationService.scheduleVideoReminder(
+            videoId: savedVideo.id!,
+            videoTitle: savedVideo.title,
+            youtubeVideoId: savedVideo.youtubeVideoId,
+            timestampSeconds: savedVideo.timestampSeconds,
+          );
+        } catch (e) {
+          debugPrint('❌ 알림 스케줄 실패: $e');
+          // 알림 실패는 치명적이지 않으므로 영상 저장 성공 메시지는 그대로 표시
+        }
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -177,59 +183,6 @@ class _CategorySelectionDialogState
     }
   }
 
-  /// [_parseDuration] - 시간 문자열을 초로 변환
-  ///
-  /// 지원 형식:
-  /// - MM:SS (예: 1:23 → 83초)
-  /// - HH:MM:SS (예: 1:23:45 → 5025초)
-  /// - YouTube 스타일: t=70s, t=1m10s, 70s, 1m10s, 1h2m30s 등
-  int? _parseDuration(String input) {
-    try {
-      // 앞뒤 공백 제거 및 앞의 "t=" 제거
-      var text = input.trim();
-      if (text.startsWith('t=')) {
-        text = text.substring(2);
-      }
-
-      // YouTube 스타일 형식: Xh, Xm, Xs 조합
-      final youtubePattern = RegExp(r'^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$');
-      final youtubeMatch = youtubePattern.firstMatch(text);
-      if (youtubeMatch != null && youtubeMatch[0]!.isNotEmpty) {
-        final hours = int.parse(youtubeMatch[1] ?? '0');
-        final minutes = int.parse(youtubeMatch[2] ?? '0');
-        final seconds = int.parse(youtubeMatch[3] ?? '0');
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-
-      // 기존 형식: MM:SS / HH:MM:SS
-      final parts = text.split(':');
-      if (parts.length == 2) {
-        final minutes = int.parse(parts[0]);
-        final seconds = int.parse(parts[1]);
-        return minutes * 60 + seconds;
-      } else if (parts.length == 3) {
-        final hours = int.parse(parts[0]);
-        final minutes = int.parse(parts[1]);
-        final seconds = int.parse(parts[2]);
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-      return 0;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  /// [_formatDuration] - 초 단위를 "M:SS" 또는 "H:MM:SS" 형식으로 변환
-  String _formatDuration(int totalSeconds) {
-    final hours = totalSeconds ~/ 3600;
-    final minutes = (totalSeconds % 3600) ~/ 60;
-    final seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
-  }
 }
 
 /// [_VideoPreview] - 영상 미리보기 위젯
@@ -307,10 +260,7 @@ class _CategoryList extends StatelessWidget {
               color: category.color,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              Icons.folder,
-              color: _getContrastColor(category.color),
-            ),
+            child: Icon(Icons.folder, color: _getContrastColor(category.color)),
           ),
           title: Text(category.name),
           onTap: () => onSelect(category),
@@ -334,7 +284,7 @@ class _EmptyCategories extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
@@ -347,10 +297,7 @@ class _EmptyCategories extends StatelessWidget {
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 16),
-        TextButton(
-          onPressed: onCancel,
-          child: Text(l10n.commonButtonConfirm),
-        ),
+        TextButton(onPressed: onCancel, child: Text(l10n.commonButtonConfirm)),
       ],
     );
   }

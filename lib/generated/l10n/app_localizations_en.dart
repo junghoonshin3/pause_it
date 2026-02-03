@@ -171,11 +171,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoTimestampLabel => 'Timestamp (Optional)';
 
   @override
-  String get videoTimestampHint => '1:23 or 1:23:45';
+  String get videoTimestampHint => '1:23, 1:23:45, 1m23s, t=70s';
 
   @override
   String get videoTimestampHelperDefault =>
-      'Enter where you stopped (Default: 0:00)';
+      'Enter where you stopped (Default: 0:00, e.g. 1m30s)';
 
   @override
   String videoTimestampHelperWithMax(String max) {
@@ -232,7 +232,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorTimestampInvalidFormat =>
-      'Enter valid timestamp format (e.g., 1:23 or 1:23:45)';
+      'Enter valid timestamp format (e.g., 1:23, 1:23:45, 1m30s, t=70s)';
 
   @override
   String errorTimestampExceeds(String timestamp, String duration) {

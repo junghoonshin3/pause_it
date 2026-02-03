@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/video.dart';
 import '../../domain/usecases/get_video_metadata.dart';
 import '../providers/video_provider.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [AddVideoDialog] - 영상 추가 다이얼로그
@@ -200,7 +201,7 @@ class _AddVideoDialogState extends ConsumerState<AddVideoDialog> {
         timestampSeconds = parsedUrl.timestampSeconds;
       } else {
         // 사용자가 입력한 타임스탬프 사용
-        timestampSeconds = _parseDuration(_timestampController.text) ?? 0;
+        timestampSeconds = TimestampUtils.parseDuration(_timestampController.text) ?? 0;
       }
 
       // 4. Video 객체 생성
@@ -236,28 +237,6 @@ class _AddVideoDialogState extends ConsumerState<AddVideoDialog> {
         _isLoading = false;
         _errorMessage = _getErrorMessage(e.toString());
       });
-    }
-  }
-
-  /// [_parseDuration] - 시간 문자열을 초로 변환
-  int? _parseDuration(String input) {
-    try {
-      final parts = input.trim().split(':');
-      if (parts.length == 2) {
-        // MM:SS
-        final minutes = int.parse(parts[0]);
-        final seconds = int.parse(parts[1]);
-        return minutes * 60 + seconds;
-      } else if (parts.length == 3) {
-        // HH:MM:SS
-        final hours = int.parse(parts[0]);
-        final minutes = int.parse(parts[1]);
-        final seconds = int.parse(parts[2]);
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-      return 0;
-    } catch (e) {
-      return 0;
     }
   }
 

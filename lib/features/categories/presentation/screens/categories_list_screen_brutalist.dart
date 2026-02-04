@@ -8,6 +8,7 @@ import '../widgets/category_selection_dialog.dart';
 import '../../../videos/presentation/screens/video_list_screen_brutalist.dart';
 import '../../../videos/presentation/providers/video_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/providers/analytics_provider.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [CategoriesListScreenBrutalist] - Neo-Brutalist 디자인의 카테고리 메인 화면
@@ -97,10 +98,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      AppTheme.accentElectric,
-                      AppTheme.accentNeon,
-                    ],
+                    colors: [AppTheme.accentElectric, AppTheme.accentNeon],
                   ),
                 ),
               ),
@@ -112,19 +110,19 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                     Text(
                       l10n.appTitle,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: AppTheme.textPrimary,
-                            letterSpacing: 2,
-                            height: 0.9,
-                          ),
+                        fontWeight: FontWeight.w900,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: 2,
+                        height: 0.9,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       l10n.appSubtitle,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: AppTheme.accentElectric,
-                            letterSpacing: 3,
-                          ),
+                        color: AppTheme.accentElectric,
+                        letterSpacing: 3,
+                      ),
                     ),
                   ],
                 ),
@@ -188,18 +186,18 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: color,
-                  fontFamily: AppTheme.fontFamilyMono,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: color,
+              fontFamily: AppTheme.fontFamilyMono,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.textSecondary,
-                  letterSpacing: 1,
-                ),
+              color: AppTheme.textSecondary,
+              letterSpacing: 1,
+            ),
           ),
         ],
       ),
@@ -248,17 +246,12 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
 
         return TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
-          duration: Duration(
-            milliseconds: 300 + (index * 50),
-          ),
+          duration: Duration(milliseconds: 300 + (index * 50)),
           curve: Curves.easeOutCubic,
           builder: (context, value, child) {
             return Transform.translate(
               offset: Offset(0, 30 * (1 - value)),
-              child: Opacity(
-                opacity: value,
-                child: child,
-              ),
+              child: Opacity(opacity: value, child: child),
             );
           },
           child: videoCountAsync.when(
@@ -304,10 +297,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               height: 140,
               decoration: BoxDecoration(
                 color: AppTheme.secondaryDark,
-                border: Border.all(
-                  color: AppTheme.accentElectric,
-                  width: 4,
-                ),
+                border: Border.all(color: AppTheme.accentElectric, width: 4),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.5),
@@ -328,10 +318,10 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             Text(
               l10n.brutalistNoCategories,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.textPrimary,
-                    letterSpacing: 2,
-                  ),
+                fontWeight: FontWeight.w900,
+                color: AppTheme.textPrimary,
+                letterSpacing: 2,
+              ),
               textAlign: TextAlign.center,
             ),
 
@@ -349,9 +339,9 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               child: Text(
                 l10n.brutalistNoCategoriesDesc,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                      height: 1.6,
-                    ),
+                  color: AppTheme.textSecondary,
+                  height: 1.6,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -372,10 +362,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: AppTheme.accentElectric,
-                width: 4,
-              ),
+              border: Border.all(color: AppTheme.accentElectric, width: 4),
             ),
             child: const Padding(
               padding: EdgeInsets.all(12.0),
@@ -389,9 +376,9 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           Text(
             l10n.commonLoading,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppTheme.accentElectric,
-                  letterSpacing: 2,
-                ),
+              color: AppTheme.accentElectric,
+              letterSpacing: 2,
+            ),
           ),
         ],
       ),
@@ -412,10 +399,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               height: 120,
               decoration: BoxDecoration(
                 color: AppTheme.secondaryDark,
-                border: Border.all(
-                  color: AppTheme.error,
-                  width: 4,
-                ),
+                border: Border.all(color: AppTheme.error, width: 4),
               ),
               child: const Icon(
                 Icons.error_outline,
@@ -427,10 +411,10 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             Text(
               l10n.commonError,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.error,
-                    letterSpacing: 2,
-                  ),
+                fontWeight: FontWeight.w900,
+                color: AppTheme.error,
+                letterSpacing: 2,
+              ),
             ),
             const SizedBox(height: 12),
             Container(
@@ -444,9 +428,9 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               ),
               child: Text(
                 errorMessage,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.error,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppTheme.error),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -465,10 +449,7 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: AppTheme.accentElectric,
-          border: Border.all(
-            color: AppTheme.primaryDark,
-            width: 3,
-          ),
+          border: Border.all(color: AppTheme.primaryDark, width: 3),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.5),
@@ -485,10 +466,10 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
             Text(
               l10n.brutalistAdd,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppTheme.primaryDark,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                  ),
+                color: AppTheme.primaryDark,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
             ),
           ],
         ),
@@ -517,6 +498,8 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               AppTheme.success,
               Icons.check_circle,
             );
+            // Analytics: 카테고리 생성 로깅
+            ref.read(analyticsServiceProvider).logCategoryCreated(name: name);
           } else {
             _showBrutalistSnackbar(
               context,
@@ -562,6 +545,11 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               AppTheme.success,
               Icons.check_circle,
             );
+            // Analytics: 카테고리 수정 로깅
+            ref.read(analyticsServiceProvider).logCategoryUpdated(
+              id: category.id!,
+              name: name,
+            );
           } else {
             _showBrutalistSnackbar(
               context,
@@ -595,8 +583,9 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
       return;
     }
 
-    final success =
-        await ref.read(categoryListProvider.notifier).deleteCategory(category.id!);
+    final success = await ref
+        .read(categoryListProvider.notifier)
+        .deleteCategory(category.id!);
 
     if (!context.mounted) return;
 
@@ -606,6 +595,11 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
         l10n.brutalistCategoryDeleted,
         AppTheme.success,
         Icons.check_circle,
+      );
+      // Analytics: 카테고리 삭제 로깅
+      ref.read(analyticsServiceProvider).logCategoryDeleted(
+        id: category.id!,
+        name: category.name,
       );
     } else {
       _showBrutalistSnackbar(
@@ -617,7 +611,19 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     }
   }
 
-  void _navigateToVideoList(BuildContext context, WidgetRef ref, Category category) {
+  void _navigateToVideoList(
+    BuildContext context,
+    WidgetRef ref,
+    Category category,
+  ) {
+    // Analytics: 카테고리 열기 로깅 (영상 개수 포함)
+    final videoCount = ref.read(videoCountProvider(category.id!)).valueOrNull ?? 0;
+    ref.read(analyticsServiceProvider).logCategoryOpened(
+      id: category.id!,
+      name: category.name,
+      videoCount: videoCount,
+    );
+
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -628,9 +634,10 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
           const end = Offset.zero;
           const curve = Curves.easeOutCubic;
 
-          var tween = Tween(begin: begin, end: end).chain(
-            CurveTween(curve: curve),
-          );
+          var tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
 
           return SlideTransition(
             position: animation.drive(tween),
@@ -657,6 +664,8 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
         sharedUrlResult: result,
         onCancel: () {
           ref.read(sharedUrlStateProvider.notifier).state = null;
+          // Analytics: 공유 Intent 취소 로깅
+          ref.read(analyticsServiceProvider).logShareIntentCancelled();
           Navigator.pop(context);
         },
       ),

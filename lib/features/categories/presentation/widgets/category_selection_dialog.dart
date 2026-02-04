@@ -7,6 +7,7 @@ import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/notification_provider.dart';
 import '../../../videos/presentation/providers/video_provider.dart';
 import '../../../../core/services/youtube_metadata_service.dart';
+import '../../../../core/providers/analytics_provider.dart';
 import '../../../../core/utils/timestamp_utils.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
@@ -165,6 +166,13 @@ class _CategorySelectionDialogState
           debugPrint('❌ 알림 스케줄 실패: $e');
           // 알림 실패는 치명적이지 않으므로 영상 저장 성공 메시지는 그대로 표시
         }
+        // Analytics: 영상 추가 로깅 (공유 Intent)
+        ref.read(analyticsServiceProvider).logVideoAdded(
+          videoId: savedVideo.id!,
+          categoryId: category.id!,
+          hasTimestamp: timestampSeconds > 0,
+          source: 'share_intent',
+        );
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

@@ -9,6 +9,7 @@ import '../widgets/video_card_brutalist.dart';
 import '../widgets/add_video_dialog.dart';
 import '../widgets/edit_video_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/providers/analytics_provider.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [VideoListScreenBrutalist] - Neo-Brutalist 디자인의 영상 목록 화면
@@ -279,7 +280,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 16),
             child: VideoCardBrutalist(
               video: video,
-              onTap: () => _playVideo(context, video),
+              onTap: () => _playVideo(context, ref, video),
               onEdit: () => _showEditVideoDialog(context, ref, video),
               onDelete: () => _deleteVideo(context, ref, video),
             ),
@@ -531,6 +532,13 @@ class VideoListScreenBrutalist extends ConsumerWidget {
               AppTheme.success,
               Icons.check_circle,
             );
+            // Analytics: 영상 추가 로깅
+            ref.read(analyticsServiceProvider).logVideoAdded(
+              videoId: savedVideo.id!,
+              categoryId: category.id!,
+              hasTimestamp: savedVideo.timestampSeconds > 0,
+              source: 'manual',
+            );
           } else {
             _showBrutalistSnackbar(
               context,
@@ -589,6 +597,12 @@ class VideoListScreenBrutalist extends ConsumerWidget {
                 AppTheme.success,
                 Icons.check_circle,
               );
+              // Analytics: 영상 카테고리 변경 로깅
+              ref.read(analyticsServiceProvider).logVideoMoved(
+                videoId: updatedVideo.id!,
+                fromCategoryId: category.id!,
+                toCategoryId: updatedVideo.categoryId,
+              );
             } else {
               _showBrutalistSnackbar(
                 context,
@@ -611,6 +625,12 @@ class VideoListScreenBrutalist extends ConsumerWidget {
                 l10n.brutalistVideoUpdated,
                 AppTheme.success,
                 Icons.check_circle,
+              );
+              // Analytics: 영상 수정 로깅 (카테고리 변경 제외)
+              ref.read(analyticsServiceProvider).logVideoUpdated(
+                videoId: updatedVideo.id!,
+                timestampChanged: updatedVideo.timestampSeconds != video.timestampSeconds,
+                memoChanged: updatedVideo.memo != video.memo,
               );
             } else {
               _showBrutalistSnackbar(
@@ -651,6 +671,11 @@ class VideoListScreenBrutalist extends ConsumerWidget {
         AppTheme.success,
         Icons.check_circle,
       );
+      // Analytics: 영상 삭제 로깅
+      ref.read(analyticsServiceProvider).logVideoDeleted(
+        videoId: video.id!,
+        categoryId: category.id!,
+      );
     } else {
       _showBrutalistSnackbar(
         context,
@@ -662,7 +687,7 @@ class VideoListScreenBrutalist extends ConsumerWidget {
   }
 
   /// [_playVideo] - YouTube 영상 재생
-  Future<void> _playVideo(BuildContext context, Video video) async {
+  Future<void> _playVideo(BuildContext context, WidgetRef ref, Video video) async {
     final l10n = AppLocalizations.of(context);
     try {
       // YouTube URL 생성 (타임스탬프 포함)
@@ -694,7 +719,21 @@ class VideoListScreenBrutalist extends ConsumerWidget {
             AppTheme.error,
             Icons.error,
           );
+        } else {
+          // Analytics: 영상 재생 로깅 (브라우저)
+          ref.read(analyticsServiceProvider).logVideoPlayed(
+            videoId: video.id!,
+            categoryId: category.id!,
+            timestampSeconds: video.timestampSeconds,
+          );
         }
+      } else {
+        // Analytics: 영상 재생 로깅 (YouTube 앱)
+        ref.read(analyticsServiceProvider).logVideoPlayed(
+          videoId: video.id!,
+          categoryId: category.id!,
+          timestampSeconds: video.timestampSeconds,
+        );
       }
     } catch (e) {
       if (!context.mounted) return;

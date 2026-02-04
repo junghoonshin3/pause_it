@@ -53,6 +53,11 @@ ios/ExportOptions.plist
 *.p12
 *.mobileprovision
 
-# Firebase config files (추후 추가 시)
+# Firebase config files (API 키 포함 — 커밋하지 않음)
 android/app/google-services.json
+android/app/src/*/google-services.json
 ios/Runner/GoogleService-Info.plist
+ios/Runner/GoogleService-Info*.plist
+macos/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+lib/firebase_options_dev.dart

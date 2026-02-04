@@ -169,10 +169,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get videoTimestampLabel => '타임스탬프 (선택)';
 
   @override
-  String get videoTimestampHint => '1:23 또는 1:23:45';
+  String get videoTimestampHint => '1:23, 1:23:45, 1m23s, t=70s';
 
   @override
-  String get videoTimestampHelperDefault => '중단한 시점을 입력하세요 (기본값: 0:00)';
+  String get videoTimestampHelperDefault =>
+      '중단한 시점을 입력하세요 (기본값: 0:00, 예: 1m30s)';
 
   @override
   String videoTimestampHelperWithMax(String max) {
@@ -229,7 +230,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get errorTimestampInvalidFormat =>
-      '올바른 타임스탬프 형식을 입력하세요 (예: 1:23 또는 1:23:45)';
+      '올바른 타임스탬프 형식을 입력하세요 (예: 1:23, 1:23:45, 1m30s, t=70s)';
 
   @override
   String errorTimestampExceeds(String timestamp, String duration) {

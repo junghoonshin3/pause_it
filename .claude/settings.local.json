@@ -9,7 +9,10 @@
       "Bash(flutter pub run:*)",
       "Bash(flutter build:*)",
       "Bash(wc:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(firebase apps:config:*)",
+      "Bash(firebase apps:download:*)",
+      "Bash(flutterfire configure:*)"
     ]
   }
 }

@@ -12,6 +12,9 @@ import 'core/theme/app_theme.dart';
 import 'core/config/flavor_config.dart';
 import 'core/config/app_config.dart';
 import 'core/providers/locale_provider.dart';
+import 'core/services/analytics_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 /// [main] - 앱 진입점 (PROD 환경)
 ///
@@ -25,6 +28,9 @@ import 'core/providers/locale_provider.dart';
 void main() async {
   // Flutter 엔진 초기화 (데이터베이스 사용을 위해 필요)
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 파이어베이스 초기화
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Flavor 설정 초기화 (PROD)
   FlavorConfig(
@@ -51,6 +57,9 @@ void main() async {
   // 알림 권한 요청 (iOS 및 Android 13+)
   await NotificationService.instance.requestPermission();
 
+  // Analytics: 앱 시작 이벤트 로깅
+  AnalyticsService.instance.logAppStarted();
+
   // 앱 실행
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -66,14 +75,31 @@ class MyApp extends ConsumerStatefulWidget {
   ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends ConsumerState<MyApp> {
+class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   late StreamSubscription<String> _intentSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _handleInitialSharedIntent();
     _listenToSharedIntents();
+  }
+
+  /// [didChangeAppLifecycleState] - 앱 라이프사이클 변경 시 Analytics 로깅
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        AnalyticsService.instance.logAppResumed();
+      case AppLifecycleState.paused:
+        AnalyticsService.instance.logAppPaused();
+      case AppLifecycleState.detached:
+        AnalyticsService.instance.logAppDetached();
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        break;
+    }
   }
 
   /// [_handleInitialSharedIntent] - 앱 최초 실행 시 공유 데이터 처리
@@ -117,12 +143,17 @@ class _MyAppState extends ConsumerState<MyApp> {
       (sharedUrlResult) {
         // sharedUrlStateProvider에 저장 -> 다이얼로그 트리거
         ref.read(sharedUrlStateProvider.notifier).state = sharedUrlResult;
+        // Analytics: 공유 Intent 수신 성공 로깅
+        AnalyticsService.instance.logShareIntentReceived(
+          hasTimestamp: sharedUrlResult.timestampSeconds > 0,
+        );
       },
     );
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _intentSubscription.cancel();
     super.dispose();
   }

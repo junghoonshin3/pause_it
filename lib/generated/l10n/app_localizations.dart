@@ -415,13 +415,13 @@ abstract class AppLocalizations {
   /// No description provided for @videoTimestampHint.
   ///
   /// In ko, this message translates to:
-  /// **'1:23 또는 1:23:45'**
+  /// **'1:23, 1:23:45, 1m23s, t=70s'**
   String get videoTimestampHint;
 
   /// No description provided for @videoTimestampHelperDefault.
   ///
   /// In ko, this message translates to:
-  /// **'중단한 시점을 입력하세요 (기본값: 0:00)'**
+  /// **'중단한 시점을 입력하세요 (기본값: 0:00, 예: 1m30s)'**
   String get videoTimestampHelperDefault;
 
   /// No description provided for @videoTimestampHelperWithMax.
@@ -529,7 +529,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorTimestampInvalidFormat.
   ///
   /// In ko, this message translates to:
-  /// **'올바른 타임스탬프 형식을 입력하세요 (예: 1:23 또는 1:23:45)'**
+  /// **'올바른 타임스탬프 형식을 입력하세요 (예: 1:23, 1:23:45, 1m30s, t=70s)'**
   String get errorTimestampInvalidFormat;
 
   /// No description provided for @errorTimestampExceeds.

@@ -169,10 +169,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get videoTimestampLabel => 'タイムスタンプ（任意）';
 
   @override
-  String get videoTimestampHint => '1:23 または 1:23:45';
+  String get videoTimestampHint => '1:23, 1:23:45, 1m23s, t=70s';
 
   @override
-  String get videoTimestampHelperDefault => '中断した時点を入力してください（デフォルト：0:00）';
+  String get videoTimestampHelperDefault =>
+      '中断した時点を入力してください（デフォルト：0:00、例：1m30s）';
 
   @override
   String videoTimestampHelperWithMax(String max) {
@@ -229,7 +230,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errorTimestampInvalidFormat =>
-      '正しいタイムスタンプ形式を入力してください（例：1:23 または 1:23:45）';
+      '正しいタイムスタンプ形式を入力してください（例：1:23, 1:23:45, 1m30s, t=70s）';
 
   @override
   String errorTimestampExceeds(String timestamp, String duration) {

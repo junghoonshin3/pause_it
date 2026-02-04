@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../domain/entities/video.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [EditVideoDialog] - 영상 편집 다이얼로그
@@ -58,7 +59,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
     super.initState();
     // 기존 값으로 초기화
     _timestampController = TextEditingController(
-      text: _formatDuration(widget.video.timestampSeconds),
+      text: TimestampUtils.formatDuration(widget.video.timestampSeconds),
     );
     _memoController = TextEditingController(
       text: widget.video.memo ?? '',
@@ -102,13 +103,13 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.access_time),
                 helperText: widget.video.durationSeconds != null
-                    ? l10n.videoTimestampHelperWithMax(_formatDuration(widget.video.durationSeconds!))
+                    ? l10n.videoTimestampHelperWithMax(TimestampUtils.formatDuration(widget.video.durationSeconds!))
                     : l10n.videoTimestampHelperEdit,
               ),
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.text,
               textInputAction: TextInputAction.next,
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9:thms=]')),
                 _TimeStampInputFormatter(),
               ],
             ),
@@ -324,7 +325,7 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     // 타임스탬프 파싱 (초 단위로 변환)
-    final newTimestamp = _parseDuration(_timestampController.text);
+    final newTimestamp = TimestampUtils.parseDuration(_timestampController.text);
 
     // 타임스탬프 형식 검증
     if (newTimestamp == null) {
@@ -349,8 +350,8 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
           SnackBar(
             content: Text(
               l10n.errorTimestampExceeds(
-                _formatDuration(newTimestamp),
-                _formatDuration(widget.video.durationSeconds!),
+                TimestampUtils.formatDuration(newTimestamp),
+                TimestampUtils.formatDuration(widget.video.durationSeconds!),
               ),
             ),
             backgroundColor: Colors.red,
@@ -398,63 +399,14 @@ class _EditVideoDialogState extends ConsumerState<EditVideoDialog> {
     Navigator.pop(context);
   }
 
-  /// [_formatDuration] - 초를 시간 문자열로 변환
-  ///
-  /// Parameters:
-  /// - [seconds]: 변환할 초
-  ///
-  /// Returns: "M:SS" 또는 "H:MM:SS" 형식의 문자열
-  String _formatDuration(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
-    final secs = seconds % 60;
-
-    if (hours > 0) {
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
-    }
-    return '$minutes:${secs.toString().padLeft(2, '0')}';
-  }
-
-  /// [_parseDuration] - 시간 문자열을 초로 변환
-  ///
-  /// Parameters:
-  /// - [input]: "M:SS" 또는 "H:MM:SS" 형식의 문자열
-  ///
-  /// Returns: 초 단위의 정수, 파싱 실패 시 null
-  int? _parseDuration(String input) {
-    try {
-      final parts = input.trim().split(':');
-      if (parts.isEmpty || parts.any((p) => p.isEmpty)) {
-        return null;
-      }
-
-      if (parts.length == 2) {
-        // MM:SS
-        final minutes = int.parse(parts[0]);
-        final seconds = int.parse(parts[1]);
-        if (seconds >= 60) return null; // 초는 0~59
-        return minutes * 60 + seconds;
-      } else if (parts.length == 3) {
-        // HH:MM:SS
-        final hours = int.parse(parts[0]);
-        final minutes = int.parse(parts[1]);
-        final seconds = int.parse(parts[2]);
-        if (minutes >= 60 || seconds >= 60) return null; // 분, 초는 0~59
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
 }
 
 /// [_TimeStampInputFormatter] - 타임스탬프 입력 포맷터
 ///
 /// 주요 기능:
-/// - 숫자와 콜론(:)만 입력 가능
+/// - MM:SS / HH:MM:SS 형식과 YouTube 스타일(t=Xh Ym Zs) 모두 허용
 /// - 연속된 콜론(::) 방지
-/// - 최대 2개의 콜론까지만 허용 (HH:MM:SS 형식)
+/// - 콜론 형식 시 최대 2개의 콜론까지만 허용
 class _TimeStampInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -465,6 +417,11 @@ class _TimeStampInputFormatter extends TextInputFormatter {
 
     // 빈 문자열은 허용
     if (text.isEmpty) return newValue;
+
+    // YouTube 스타일 형식 입력 중인 경우 콜론 관련 검증 건너뛰기
+    if (text.contains('h') || text.contains('m') || text.contains('s') || text.contains('=')) {
+      return newValue;
+    }
 
     // 연속된 콜론 방지
     if (text.contains('::')) {

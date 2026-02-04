@@ -66,8 +66,8 @@
   "videoUrlLabel": "YouTube URL",
   "videoUrlHint": "https://www.youtube.com/watch?v=...",
   "videoTimestampLabel": "Timestamp (Optional)",
-  "videoTimestampHint": "1:23 or 1:23:45",
-  "videoTimestampHelperDefault": "Enter where you stopped (Default: 0:00)",
+  "videoTimestampHint": "1:23, 1:23:45, 1m23s, t=70s",
+  "videoTimestampHelperDefault": "Enter where you stopped (Default: 0:00, e.g. 1m30s)",
   "videoTimestampHelperWithMax": "Enter where you stopped (Max: {max})",
   "@videoTimestampHelperWithMax": {
     "placeholders": {
@@ -92,7 +92,7 @@
   "errorNetwork": "Network error: Check your internet connection",
   "errorVideoNotFound": "Video not found (private/deleted)",
   "errorVideoMetadataFailed": "Failed to fetch video info",
-  "errorTimestampInvalidFormat": "Enter valid timestamp format (e.g., 1:23 or 1:23:45)",
+  "errorTimestampInvalidFormat": "Enter valid timestamp format (e.g., 1:23, 1:23:45, 1m30s, t=70s)",
   "errorTimestampExceeds": "Timestamp ({timestamp}) cannot exceed video duration ({duration})",
   "@errorTimestampExceeds": {
     "placeholders": {

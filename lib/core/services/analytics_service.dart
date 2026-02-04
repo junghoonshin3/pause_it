@@ -116,8 +116,8 @@ class AnalyticsService {
   }) async {
     await _log('video_updated', {
       'video_id': videoId,
-      'timestamp_changed': timestampChanged,
-      'memo_changed': memoChanged,
+      'timestamp_changed': timestampChanged ? 1 : 0,
+      'memo_changed': memoChanged ? 1 : 0,
     });
   }
 
@@ -162,7 +162,9 @@ class AnalyticsService {
 
   /// [logShareIntentReceived] - 공유 URL 수신 및 파싱 성공 이벤트
   Future<void> logShareIntentReceived({required bool hasTimestamp}) async {
-    await _log('share_intent_received', {'has_timestamp': hasTimestamp});
+    await _log('share_intent_received', {
+      'has_timestamp': hasTimestamp ? 1 : 0,
+    });
   }
 
   /// [logShareIntentCancelled] - 공유 URL 카테고리 선택 취소 이벤트

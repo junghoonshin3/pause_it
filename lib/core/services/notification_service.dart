@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:url_launcher/url_launcher.dart';
+import 'analytics_service.dart';
 
 /// [NotificationService] - 로컬 알림 관리 서비스
 ///
@@ -255,6 +256,12 @@ class NotificationService {
           // YouTube 앱 우선 실행 (iOS/Android)
           await launchUrl(url, mode: LaunchMode.externalApplication);
           print('✅ 알림 클릭 → YouTube 실행: $payload');
+          // Analytics: 알림 클릭 로깅 (group summary ID 0 제외)
+          if (response.id != null && response.id != 0) {
+            AnalyticsService.instance.logNotificationTapped(
+              videoId: response.id!,
+            );
+          }
         } else {
           print('❌ URL 실행 불가: $payload');
         }

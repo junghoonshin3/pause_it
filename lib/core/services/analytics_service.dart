@@ -23,10 +23,7 @@ class AnalyticsService {
       if (kDebugMode) {
         debugPrint('[Analytics] $name: ${params ?? {}}');
       }
-      await FirebaseAnalytics.instance.logEvent(
-        name: name,
-        parameters: params,
-      );
+      await FirebaseAnalytics.instance.logEvent(name: name, parameters: params);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('[Analytics] ❌ 로깅 실패 ($name): $e');
@@ -64,12 +61,18 @@ class AnalyticsService {
   }
 
   /// [logCategoryUpdated] - 카테고리 수정 이벤트
-  Future<void> logCategoryUpdated({required int id, required String name}) async {
+  Future<void> logCategoryUpdated({
+    required int id,
+    required String name,
+  }) async {
     await _log('category_updated', {'id': id, 'name': name});
   }
 
   /// [logCategoryDeleted] - 카테고리 삭제 이벤트
-  Future<void> logCategoryDeleted({required int id, required String name}) async {
+  Future<void> logCategoryDeleted({
+    required int id,
+    required String name,
+  }) async {
     await _log('category_deleted', {'id': id, 'name': name});
   }
 
@@ -100,7 +103,7 @@ class AnalyticsService {
     await _log('video_added', {
       'video_id': videoId,
       'category_id': categoryId,
-      'has_timestamp': hasTimestamp,
+      'has_timestamp': hasTimestamp ? 1 : 0, // boolean → int
       'source': source,
     });
   }

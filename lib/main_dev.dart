@@ -107,10 +107,13 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         AnalyticsService.instance.logAppResumed();
+        break;
       case AppLifecycleState.paused:
         AnalyticsService.instance.logAppPaused();
+        break;
       case AppLifecycleState.detached:
         AnalyticsService.instance.logAppDetached();
+        break;
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
         break;

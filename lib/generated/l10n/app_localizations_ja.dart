@@ -260,4 +260,30 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notificationCannotDeleteLastCategory => '最後のカテゴリは削除できません';
+
+  @override
+  String get settingsTitle => '設定';
+
+  @override
+  String get settingsAlarmEnabled => '通知を有効にする';
+
+  @override
+  String get settingsReminderEnabled => 'リマインダー通知';
+
+  @override
+  String get settingsReminderDelay => 'リマインダー時間';
+
+  @override
+  String settingsReminderHour(int count) {
+    return '$count時間';
+  }
+
+  @override
+  String get settingsAlarmPermission =>
+      '正確なアラム権限が必要です。\n設定 > 特別なアプリアクセス > 正確なアラムで許可してください';
+
+  @override
+  String settingsReminderMinute(int count) {
+    return '$count分';
+  }
 }

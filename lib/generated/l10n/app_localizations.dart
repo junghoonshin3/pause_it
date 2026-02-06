@@ -585,6 +585,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'마지막 카테고리는 삭제할 수 없습니다'**
   String get notificationCannotDeleteLastCategory;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsAlarmEnabled.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 활성화'**
+  String get settingsAlarmEnabled;
+
+  /// No description provided for @settingsReminderEnabled.
+  ///
+  /// In ko, this message translates to:
+  /// **'리마인더 알림'**
+  String get settingsReminderEnabled;
+
+  /// No description provided for @settingsReminderDelay.
+  ///
+  /// In ko, this message translates to:
+  /// **'리마인더 시간'**
+  String get settingsReminderDelay;
+
+  /// No description provided for @settingsReminderHour.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}시간'**
+  String settingsReminderHour(int count);
+
+  /// No description provided for @settingsAlarmPermission.
+  ///
+  /// In ko, this message translates to:
+  /// **'정확한 알림 권한이 필요합니다.\n설정 > 특수 앱 액세스 > 정확한 알림에서 허용해주세요'**
+  String get settingsAlarmPermission;
+
+  /// No description provided for @settingsReminderMinute.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}분'**
+  String settingsReminderMinute(int count);
 }
 
 class _AppLocalizationsDelegate

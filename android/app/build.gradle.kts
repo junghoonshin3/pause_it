@@ -12,6 +12,19 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Git 커밋 카운트를 기반으로 버전 코드 자동 생성
+fun getVersionCodeFromGit(): Int {
+    return try {
+        val process = Runtime.getRuntime().exec("git rev-list --count HEAD")
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        process.waitFor()
+        output.trim().toIntOrNull() ?: 1
+    } catch (e: Exception) {
+        println("Warning: Could not get git commit count, using default version code: ${e.message}")
+        1
+    }
+}
+
 android {
     namespace = "com.pauseit.pause_it"
     compileSdk = flutter.compileSdkVersion
@@ -34,7 +47,8 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
+        // Git 커밋 카운트 기반 자동 버전 코드 (pubspec.yaml의 버전 코드보다 우선)
+        versionCode = getVersionCodeFromGit()
         versionName = flutter.versionName
     }
 

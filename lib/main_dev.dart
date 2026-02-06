@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'generated/l10n/app_localizations.dart';
 import 'shared/data/database/database_helper.dart';
 import 'features/categories/presentation/screens/categories_list_screen_brutalist.dart';
@@ -14,6 +16,7 @@ import 'core/theme/app_theme.dart';
 import 'core/config/flavor_config.dart';
 import 'core/config/app_config.dart';
 import 'core/providers/locale_provider.dart';
+import 'core/providers/settings_provider.dart';
 import 'core/services/analytics_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options_dev.dart';
@@ -63,8 +66,10 @@ void main() async {
   // 데이터베이스 초기화 (테이블 생성 보장)
   await DatabaseHelper.instance.database;
 
-  // 타임존 데이터 초기화 (알림 스케줄링에 필요)
+  // 타임존 데이터 초기화 및 디바이스 로컬 타임졸 설정 (알림 스케줄링에 필요)
   tz.initializeTimeZones();
+  final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+  tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
 
   // 알림 서비스 초기화
   await NotificationService.instance.initialize();
@@ -97,6 +102,8 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // 앱 설정 복원 (SharedPreferences)
+    ref.read(settingsProvider.notifier).loadSettings();
     _handleInitialSharedIntent();
     _listenToSharedIntents();
   }

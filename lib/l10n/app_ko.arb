@@ -111,5 +111,26 @@
   "notificationCategoryAdded": "카테고리가 추가되었습니다",
   "notificationCategoryUpdated": "카테고리가 수정되었습니다",
   "notificationCategoryDeleted": "카테고리가 삭제되었습니다",
-  "notificationCannotDeleteLastCategory": "마지막 카테고리는 삭제할 수 없습니다"
+  "notificationCannotDeleteLastCategory": "마지막 카테고리는 삭제할 수 없습니다",
+  "settingsTitle": "설정",
+  "settingsAlarmEnabled": "알림 활성화",
+  "settingsReminderEnabled": "리마인더 알림",
+  "settingsReminderDelay": "리마인더 시간",
+  "settingsReminderHour": "{count}시간",
+  "@settingsReminderHour": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAlarmPermission": "정확한 알림 권한이 필요합니다.\n설정 > 특수 앱 액세스 > 정확한 알림에서 허용해주세요",
+  "settingsReminderMinute": "{count}분",
+  "@settingsReminderMinute": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

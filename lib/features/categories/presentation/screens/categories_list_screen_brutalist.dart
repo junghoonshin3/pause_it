@@ -9,6 +9,9 @@ import '../../../videos/presentation/screens/video_list_screen_brutalist.dart';
 import '../../../videos/presentation/providers/video_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/analytics_provider.dart';
+import '../widgets/settings_bottom_sheet.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../core/config/flavor_config.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [CategoriesListScreenBrutalist] - Neo-Brutalist 디자인의 카테고리 메인 화면
@@ -128,6 +131,43 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
                 ),
               ),
 
+              // [DEV] 테스트 알림 버튼 — dev 환경에서만 표시
+              if (FlavorConfig.isDev)
+                _buildIconButton(
+                  context: context,
+                  icon: Icons.notifications_outlined,
+                  color: AppTheme.accentElectric,
+                  onPressed: () async {
+                    try {
+                      await NotificationService.instance
+                          .scheduleTestNotification();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('10초 후 테스트 알림 발송됨'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    } catch (e) {}
+                  },
+                ),
+
+              // 설정 아이콘
+              _buildIconButton(
+                context: context,
+                icon: Icons.settings_outlined,
+                color: AppTheme.textSecondary,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isDismissible: true,
+                    enableDrag: true,
+                    builder: (_) => const SettingsBottomSheet(),
+                  );
+                },
+              ),
+              const SizedBox(width: 16),
               // 새로고침 버튼
               _buildIconButton(
                 context: context,
@@ -546,10 +586,9 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
               Icons.check_circle,
             );
             // Analytics: 카테고리 수정 로깅
-            ref.read(analyticsServiceProvider).logCategoryUpdated(
-              id: category.id!,
-              name: name,
-            );
+            ref
+                .read(analyticsServiceProvider)
+                .logCategoryUpdated(id: category.id!, name: name);
           } else {
             _showBrutalistSnackbar(
               context,
@@ -597,10 +636,9 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
         Icons.check_circle,
       );
       // Analytics: 카테고리 삭제 로깅
-      ref.read(analyticsServiceProvider).logCategoryDeleted(
-        id: category.id!,
-        name: category.name,
-      );
+      ref
+          .read(analyticsServiceProvider)
+          .logCategoryDeleted(id: category.id!, name: category.name);
     } else {
       _showBrutalistSnackbar(
         context,
@@ -617,12 +655,15 @@ class CategoriesListScreenBrutalist extends ConsumerWidget {
     Category category,
   ) {
     // Analytics: 카테고리 열기 로깅 (영상 개수 포함)
-    final videoCount = ref.read(videoCountProvider(category.id!)).valueOrNull ?? 0;
-    ref.read(analyticsServiceProvider).logCategoryOpened(
-      id: category.id!,
-      name: category.name,
-      videoCount: videoCount,
-    );
+    final videoCount =
+        ref.read(videoCountProvider(category.id!)).valueOrNull ?? 0;
+    ref
+        .read(analyticsServiceProvider)
+        .logCategoryOpened(
+          id: category.id!,
+          name: category.name,
+          videoCount: videoCount,
+        );
 
     Navigator.push(
       context,

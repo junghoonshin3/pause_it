@@ -111,5 +111,26 @@
   "notificationCategoryAdded": "カテゴリが追加されました",
   "notificationCategoryUpdated": "カテゴリが更新されました",
   "notificationCategoryDeleted": "カテゴリが削除されました",
-  "notificationCannotDeleteLastCategory": "最後のカテゴリは削除できません"
+  "notificationCannotDeleteLastCategory": "最後のカテゴリは削除できません",
+  "settingsTitle": "設定",
+  "settingsAlarmEnabled": "通知を有効にする",
+  "settingsReminderEnabled": "リマインダー通知",
+  "settingsReminderDelay": "リマインダー時間",
+  "settingsReminderHour": "{count}時間",
+  "@settingsReminderHour": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAlarmPermission": "正確なアラム権限が必要です。\n設定 > 特別なアプリアクセス > 正確なアラムで許可してください",
+  "settingsReminderMinute": "{count}分",
+  "@settingsReminderMinute": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

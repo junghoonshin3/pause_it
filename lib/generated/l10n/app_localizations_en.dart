@@ -263,4 +263,30 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationCannotDeleteLastCategory =>
       'Cannot delete last category';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsAlarmEnabled => 'Enable Notifications';
+
+  @override
+  String get settingsReminderEnabled => 'Reminder Alerts';
+
+  @override
+  String get settingsReminderDelay => 'Reminder Time';
+
+  @override
+  String settingsReminderHour(int count) {
+    return '$count hour(s)';
+  }
+
+  @override
+  String get settingsAlarmPermission =>
+      'Exact alarm permission is required.\nPlease allow it in Settings > Special App Access > Exact Alarms';
+
+  @override
+  String settingsReminderMinute(int count) {
+    return '$count min';
+  }
 }

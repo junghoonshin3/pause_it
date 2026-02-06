@@ -8,6 +8,7 @@ import '../../../videos/presentation/providers/notification_provider.dart';
 import '../../../videos/presentation/providers/video_provider.dart';
 import '../../../../core/services/youtube_metadata_service.dart';
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/utils/timestamp_utils.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
@@ -152,16 +153,20 @@ class _CategorySelectionDialogState
     Navigator.pop(context);
 
     if (savedVideo != null) {
-      // 저장된 영상에 대해 리마인더 알림 스케줄
+      // 저장된 영상에 대해 설정값 체크 후 리마인더 알림 스케줄
       if (savedVideo.id != null) {
         try {
-          final notificationService = ref.read(notificationServiceProvider);
-          await notificationService.scheduleVideoReminder(
-            videoId: savedVideo.id!,
-            videoTitle: savedVideo.title,
-            youtubeVideoId: savedVideo.youtubeVideoId,
-            timestampSeconds: savedVideo.timestampSeconds,
-          );
+          final settings = ref.read(settingsProvider);
+          if (settings.alarmEnabled && settings.reminderEnabled) {
+            final notificationService = ref.read(notificationServiceProvider);
+            await notificationService.scheduleVideoReminder(
+              videoId: savedVideo.id!,
+              videoTitle: savedVideo.title,
+              youtubeVideoId: savedVideo.youtubeVideoId,
+              timestampSeconds: savedVideo.timestampSeconds,
+              delayMinutes: settings.reminderDelayMinutes,
+            );
+          }
         } catch (e) {
           debugPrint('❌ 알림 스케줄 실패: $e');
           // 알림 실패는 치명적이지 않으므로 영상 저장 성공 메시지는 그대로 표시

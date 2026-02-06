@@ -260,4 +260,30 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notificationCannotDeleteLastCategory => '마지막 카테고리는 삭제할 수 없습니다';
+
+  @override
+  String get settingsTitle => '설정';
+
+  @override
+  String get settingsAlarmEnabled => '알림 활성화';
+
+  @override
+  String get settingsReminderEnabled => '리마인더 알림';
+
+  @override
+  String get settingsReminderDelay => '리마인더 시간';
+
+  @override
+  String settingsReminderHour(int count) {
+    return '$count시간';
+  }
+
+  @override
+  String get settingsAlarmPermission =>
+      '정확한 알림 권한이 필요합니다.\n설정 > 특수 앱 액세스 > 정확한 알림에서 허용해주세요';
+
+  @override
+  String settingsReminderMinute(int count) {
+    return '$count분';
+  }
 }

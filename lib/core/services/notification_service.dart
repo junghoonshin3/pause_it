@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:url_launcher/url_launcher.dart';
@@ -48,9 +49,6 @@ class NotificationService {
   /// Android 그룹 알림을 묶는 키
   static const String _groupKey = 'pause_it_video_reminders';
 
-  /// 영상 리마인더 알림 지연 시간
-  static const Duration _reminderDelay = Duration(hours: 3);
-
   /// [initialize] - 알림 서비스 초기화
   ///
   /// 앱 시작 시 한 번만 호출
@@ -58,7 +56,7 @@ class NotificationService {
   Future<void> initialize() async {
     // Android 초기화 설정
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      '@drawable/ic_stat_notification',
     );
 
     // iOS 초기화 설정
@@ -76,7 +74,7 @@ class NotificationService {
 
     // 알림 플러그인 초기화 (알림 클릭 콜백 포함)
     await _notifications.initialize(
-      settings,
+      settings: settings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
@@ -97,7 +95,24 @@ class NotificationService {
     print('✅ NotificationService 초기화 완료');
   }
 
-  /// [scheduleVideoReminder] - 3시간 후 영상 알림 스케줄
+  /// [canScheduleExactAlarms] - 정확한 알림 권한 체크
+  ///
+  /// Android에서 정확한 알림 스케줄이 가능한지 확인 (v20 네이티브 API 사용)
+  /// iOS는 항상 true 반환
+  ///
+  /// Returns: 정확한 알림 권한 허용 여부
+  Future<bool> canScheduleExactAlarms() async {
+    if (Platform.isAndroid) {
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      return (await androidPlugin?.canScheduleExactNotifications()) ?? false;
+    }
+    return true; // iOS는 항상 true
+  }
+
+  /// [scheduleVideoReminder] - 영상 알림 스케줄
   ///
   /// 개별 영상 알림 스케줄 후 Android에서는 그룹 summary도 갱신
   ///
@@ -106,15 +121,19 @@ class NotificationService {
   /// - [videoTitle]: 영상 제목
   /// - [youtubeVideoId]: YouTube 영상 ID
   /// - [timestampSeconds]: 재생 시작 위치 (초)
+  /// - [delayMinutes]: 알림 지연 시간 (분 단위, 기본값: 180)
   Future<void> scheduleVideoReminder({
     required int videoId,
     required String videoTitle,
     required String youtubeVideoId,
     required int timestampSeconds,
+    int delayMinutes = 180,
   }) async {
     try {
-      // 3시간 후 시간 계산
-      final scheduledDate = tz.TZDateTime.now(tz.local).add(_reminderDelay);
+      // 지연 시간 후 스케줄 시간 계산
+      final scheduledDate = tz.TZDateTime.now(
+        tz.local,
+      ).add(Duration(minutes: delayMinutes));
 
       // YouTube URL 생성 (타임스탬프 포함)
       final youtubeUrl =
@@ -122,18 +141,20 @@ class NotificationService {
 
       // 개별 영상 알림 스케줄
       await _notifications.zonedSchedule(
-        videoId, // 알림 ID = 영상 ID
-        '나중에 보려던 영상이 있어요! 🎬',
-        '$videoTitle - 다시 이어서 보기',
-        scheduledDate,
-        NotificationDetails(
+        id: videoId, // 알림 ID = 영상 ID
+        scheduledDate: scheduledDate,
+        title: '나중에 보려던 영상이 있어요! 🎬',
+        body: '$videoTitle - 다시 이어서 보기',
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'video_reminder',
             '영상 알림',
             channelDescription: '나중에 보려던 영상을 알려드립니다',
             importance: Importance.high,
             priority: Priority.high,
-            icon: '@mipmap/ic_launcher',
+            icon: '@drawable/ic_stat_notification', // Small icon (status bar)
+            largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'), // Large icon (notification body)
+            color: const Color(0xFF00F0FF), // AppTheme.accentElectric (Neo-Brutalist cyan)
             groupKey: _groupKey,
           ),
           iOS: const DarwinNotificationDetails(
@@ -143,8 +164,6 @@ class NotificationService {
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
         payload: youtubeUrl, // 알림 클릭 시 전달될 URL
       );
 
@@ -168,29 +187,28 @@ class NotificationService {
   ) async {
     try {
       // 기존 group summary 취소 (같은 ID 중복 방지)
-      await _notifications.cancel(_groupSummaryId);
+      await _notifications.cancel(id: _groupSummaryId);
       // group summary 스케줄
       await _notifications.zonedSchedule(
-        _groupSummaryId,
-        '나중에 보려던 영상이 있어요! 🎬',
-        '저장한 영상을 이어서 보기',
-        scheduledDate,
-        NotificationDetails(
+        id: _groupSummaryId,
+        title: '나중에 보려던 영상이 있어요! 🎬',
+        body: '저장한 영상을 이어서 보기',
+        scheduledDate: scheduledDate,
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'video_reminder',
             '영상 알림',
             channelDescription: '나중에 보려던 영상을 알려드립니다',
             importance: Importance.high,
             priority: Priority.high,
-            icon: '@mipmap/ic_launcher',
+            icon: '@drawable/ic_stat_notification',
+            largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+            color: const Color(0xFF00F0FF),
             groupKey: _groupKey,
             setAsGroupSummary: true,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        payload: null, // 탭 시 앱만 열림
       );
       print('✅ 그룹 summary 갱신: 발송시간=$scheduledDate');
     } catch (e) {
@@ -207,7 +225,7 @@ class NotificationService {
   /// - [videoId]: 취소할 알림의 영상 ID
   Future<void> cancelNotification(int videoId) async {
     try {
-      await _notifications.cancel(videoId);
+      await _notifications.cancel(id: videoId);
       print('🗑️ 알림 취소: ID=$videoId');
 
       // Android에서 남은 영상 알림이 없으면 group summary도 취소
@@ -218,7 +236,7 @@ class NotificationService {
           (n) => n.id != _groupSummaryId,
         );
         if (!hasRemainingVideoAlarms) {
-          await _notifications.cancel(_groupSummaryId);
+          await _notifications.cancel(id: _groupSummaryId);
           print('🗑️ 그룹 summary 취소 (남은 영상 알림 없음)');
         }
       }
@@ -271,6 +289,47 @@ class NotificationService {
     }
   }
 
+  /// [scheduleTestNotification] - 디버그용 테스트 알림 (10초 후 발송)
+  ///
+  /// 에뮬레이터/디바이스에서 알림 동작 여부 확인용
+  /// 주장성 코드: 테스트 완료 후 제거
+  Future<void> scheduleTestNotification() async {
+    try {
+      final scheduledDate = tz.TZDateTime.now(
+        tz.local,
+      ).add(const Duration(seconds: 10));
+
+      await _notifications.zonedSchedule(
+        id: 999, // 테스트 전용 알림 ID
+        title: '🔔 테스트 알림',
+        body: '10초 후 발송된 테스트 알림입니다',
+        scheduledDate: scheduledDate,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            'video_reminder',
+            '영상 알림',
+            channelDescription: '나중에 보려던 영상을 알려드립니다',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@drawable/ic_stat_notification',
+            largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+            color: const Color(0xFF00F0FF),
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+
+      print('✅ 테스트 알림 스케줄: 발송시간=$scheduledDate');
+    } catch (e) {
+      print('❌ 테스트 알림 스케줄 실패: $e');
+    }
+  }
+
   /// [requestPermission] - 알림 권한 요청
   ///
   /// iOS 및 Android 13+ 에서 필수
@@ -294,6 +353,10 @@ class NotificationService {
       bool? androidGranted = await androidPlugin
           ?.requestNotificationsPermission();
 
+      // Android 정확한 알림 권한 요청 (Android 12+, SCHEDULE_EXACT_ALARM)
+      bool? exactAlarmGranted = await androidPlugin
+          ?.requestExactAlarmsPermission();
+
       // iOS 알림 권한 요청
       bool? iosGranted = await iosPlugin?.requestPermissions(
         alert: true,
@@ -301,7 +364,10 @@ class NotificationService {
         sound: true,
       );
 
-      final granted = (androidGranted ?? true) && (iosGranted ?? true);
+      final granted =
+          (androidGranted ?? true) &&
+          (exactAlarmGranted ?? true) &&
+          (iosGranted ?? true);
 
       if (granted) {
         print('✅ 알림 권한 허용됨');

@@ -10,6 +10,7 @@ import '../widgets/add_video_dialog.dart';
 import '../widgets/edit_video_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/providers/settings_provider.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 /// [VideoListScreenBrutalist] - Neo-Brutalist 디자인의 영상 목록 화면
@@ -516,14 +517,18 @@ class VideoListScreenBrutalist extends ConsumerWidget {
 
           // 결과 메시지 표시
           if (savedVideo != null && savedVideo.id != null) {
-            // 알림 스케줄 (10분 후) - 저장된 영상의 ID 사용
-            final notificationService = ref.read(notificationServiceProvider);
-            await notificationService.scheduleVideoReminder(
-              videoId: savedVideo.id!,
-              videoTitle: savedVideo.title,
-              youtubeVideoId: savedVideo.youtubeVideoId,
-              timestampSeconds: savedVideo.timestampSeconds,
-            );
+            // 설정값 체크 후 리마인더 스케줄
+            final settings = ref.read(settingsProvider);
+            if (settings.alarmEnabled && settings.reminderEnabled) {
+              final notificationService = ref.read(notificationServiceProvider);
+              await notificationService.scheduleVideoReminder(
+                videoId: savedVideo.id!,
+                videoTitle: savedVideo.title,
+                youtubeVideoId: savedVideo.youtubeVideoId,
+                timestampSeconds: savedVideo.timestampSeconds,
+                delayMinutes: settings.reminderDelayMinutes,
+              );
+            }
 
             if (!context.mounted) return;
             _showBrutalistSnackbar(

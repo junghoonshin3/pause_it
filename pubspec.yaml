@@ -61,14 +61,18 @@ dependencies:
   receive_sharing_intent: ^1.8.1
 
   # Local Notifications
-  flutter_local_notifications: ^17.2.0
-  timezone: ^0.9.4
+  flutter_local_notifications: ^20.0.0
+  timezone: ^0.10.0
+
+  # Shared Preferences (앱 설정 저장)
+  shared_preferences: ^2.2.0
 
   # Google Fonts for Typography
   google_fonts: ^6.2.1
   firebase_core: ^4.4.0
   firebase_analytics: ^12.1.1
   firebase_crashlytics: ^5.0.7
+  flutter_timezone: ^5.0.1
 
 dev_dependencies:
   flutter_test:

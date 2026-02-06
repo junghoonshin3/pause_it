@@ -12,7 +12,10 @@
       "Bash(tree:*)",
       "Bash(firebase apps:config:*)",
       "Bash(firebase apps:download:*)",
-      "Bash(flutterfire configure:*)"
+      "Bash(flutterfire configure:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(python3:*)",
+      "Bash(find:*)"
     ]
   }
 }

@@ -111,5 +111,26 @@
   "notificationCategoryAdded": "Category added",
   "notificationCategoryUpdated": "Category updated",
   "notificationCategoryDeleted": "Category deleted",
-  "notificationCannotDeleteLastCategory": "Cannot delete last category"
+  "notificationCannotDeleteLastCategory": "Cannot delete last category",
+  "settingsTitle": "Settings",
+  "settingsAlarmEnabled": "Enable Notifications",
+  "settingsReminderEnabled": "Reminder Alerts",
+  "settingsReminderDelay": "Reminder Time",
+  "settingsReminderHour": "{count} hour(s)",
+  "@settingsReminderHour": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAlarmPermission": "Exact alarm permission is required.\nPlease allow it in Settings > Special App Access > Exact Alarms",
+  "settingsReminderMinute": "{count} min",
+  "@settingsReminderMinute": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

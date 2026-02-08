@@ -5,9 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "pause_it",
+            "name": "Pause it DEV",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "lib/main_dev.dart"
+        },
+        {
+            "name": "Pause it PROD",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_prod.dart"
         },
         {
             "name": "pause_it (profile mode)",

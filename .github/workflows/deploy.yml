@@ -1,0 +1,41 @@
+name: Deploy to Firebase App Distribution
+
+on:
+  push:
+    branches: [ "main", "develop" ] # develop은 dev, main은 prod로 배포
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. 환경 설정 (Java, Flutter, Ruby)
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: '17' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: 'stable', cache: true }
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: '3.2', working-directory: android, bundler-cache: true }
+
+      # 2. 인증 파일 복원
+      - name: Create Auth Files
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > android/firebase_credentials.json
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
+          echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
+
+      # 3. 브랜치에 따른 배포
+      - name: Deploy to Dev
+        if: github.ref == 'refs/heads/develop'
+        run: bundle exec fastlane dev
+        working-directory: android
+        env:
+          FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV }}
+
+      - name: Deploy to Prod
+        if: github.ref == 'refs/heads/main'
+        run: bundle exec fastlane prod
+        working-directory: android
+        env:
+          FIREBASE_APP_ID_PROD: ${{ secrets.FIREBASE_APP_ID_PROD }}

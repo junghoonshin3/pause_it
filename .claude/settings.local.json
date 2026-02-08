@@ -15,7 +15,8 @@
       "Bash(flutterfire configure:*)",
       "mcp__ide__getDiagnostics",
       "Bash(python3:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git add:*)"
     ]
   }
 }

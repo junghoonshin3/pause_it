@@ -1,0 +1,25 @@
+default_platform(:android)
+
+platform :android do
+  # 공통 배포 함수
+  def deploy_to_firebase(flavor)
+    # 1. 빌드 (Flutter 명령어로 실행)
+    sh("flutter build apk --flavor #{flavor} --release")
+
+    # 2. Firebase 업로드
+    firebase_app_distribution(
+      app: ENV["FIREBASE_APP_ID_#{flavor.upcase}"], # 환경변수 사용
+      service_credentials_file: "android/firebase_credentials.json",
+      groups: "testers",
+      android_artifact_path: "build/app/outputs/flutter-apk/app-#{flavor}-release.apk"
+    )
+  end
+
+  lane :dev do
+    deploy_to_firebase("dev")
+  end
+
+  lane :prod do
+    deploy_to_firebase("prod")
+  end
+end

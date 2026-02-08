@@ -61,3 +61,8 @@ ios/Runner/GoogleService-Info*.plist
 macos/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
 lib/firebase_options_dev.dart
+
+# Firebase 서비스 계정 키 (JSON)
+android/firebase_credentials.json
+ios/firebase_credentials.json
+

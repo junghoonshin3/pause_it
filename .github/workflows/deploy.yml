@@ -26,12 +26,20 @@ jobs:
           echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
 
       # 3. 브랜치에 따른 배포
+      - name: Create Firebase Options (Dev)
+        if: github.ref == 'refs/heads/develop'
+        run: echo "${{ secrets.FIREBASE_OPTIONS_DEV }}" > lib/firebase_options_dev.dart
+
       - name: Deploy to Dev
         if: github.ref == 'refs/heads/develop'
         run: bundle exec fastlane dev
         working-directory: android
         env:
           FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV }}
+
+      - name: Create Firebase Options (Prod)
+        if: github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.FIREBASE_OPTIONS_PROD }}" > lib/firebase_options.dart
 
       - name: Deploy to Prod
         if: github.ref == 'refs/heads/main'

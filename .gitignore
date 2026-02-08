@@ -66,3 +66,12 @@ lib/firebase_options_dev.dart
 android/firebase_credentials.json
 ios/firebase_credentials.json
 
+# Fastlane 로그 및 리포트
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Fastlane 환경변수 로컬 파일
+.env
+.env.*.

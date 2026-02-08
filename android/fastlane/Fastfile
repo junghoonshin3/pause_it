@@ -4,7 +4,7 @@ platform :android do
   # 공통 배포 함수
   def deploy_to_firebase(flavor)
     # 1. 빌드 (Flutter 명령어로 실행)
-    sh("flutter build apk --release --flavor #{flavor} -t lib/main_#{flavor}.dart)
+    sh("flutter build apk --release --flavor #{flavor} -t lib/main_#{flavor}.dart")
 
     # 2. Firebase 업로드
     firebase_app_distribution(

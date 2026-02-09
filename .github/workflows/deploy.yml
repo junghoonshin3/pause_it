@@ -1,4 +1,4 @@
-name: Deploy to Firebase App Distribution
+name: Deploy to Firebase App Distribution & Google Play Console
 
 on:
   push:
@@ -57,11 +57,11 @@ jobs:
         run: |
           echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_DEV_BASE64 }}" | base64 --decode > android/firebase_credentials.json
 
-      # 2-2. Firebase 서비스 계정 (Prod)
-      - name: Create Firebase Credentials (Prod)
+      # 2-2. Google Play Console 서비스 계정 (Prod만)
+      - name: Create Google Play Console Credentials (Prod)
         if: github.ref == 'refs/heads/main'
         run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_PROD_BASE64 }}" | base64 --decode > android/firebase_credentials.json
+          echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}" | base64 --decode > android/google_play_credentials.json
 
       # 2-1. Google Services JSON 파일 생성 (Dev)
       - name: Create Google Services JSON (Dev)
@@ -101,16 +101,23 @@ jobs:
           EOF
 
       # 4. 브랜치에 따른 배포
-      - name: Deploy to Dev
+      - name: Deploy to Dev (Firebase)
         if: github.ref == 'refs/heads/develop'
         run: bundle exec fastlane dev
         working-directory: android
         env:
           FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV_ANDROID }}
 
-      - name: Deploy to Prod
+      - name: Deploy to Prod (Google Play Console)
         if: github.ref == 'refs/heads/main'
         run: bundle exec fastlane prod
         working-directory: android
-        env:
-          FIREBASE_APP_ID_PROD: ${{ secrets.FIREBASE_APP_ID_PROD_ANDROID }}
+
+      # 5. AAB 파일 아티팩트 업로드 (Prod만, 디버깅용)
+      - name: Upload AAB Artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-prod-release.aab
+          path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
+          retention-days: 7

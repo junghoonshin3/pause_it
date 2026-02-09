@@ -2,9 +2,11 @@
 
 ## 개요
 
-Firebase API 키와 앱 ID를 환경변수로 분리하여 보안을 강화했습니다.
-- **민감한 정보**: `apiKey`, `appId` → 환경변수로 관리
+Firebase API 키와 앱 ID를 `flutter_dotenv` 패키지를 사용하여 `.env` 파일에서 관리합니다.
+- **민감한 정보**: `apiKey`, `appId` → `.env` 파일로 관리 (Git 무시)
 - **비민감 정보**: `projectId`, `storageBucket` 등 → Git 커밋
+
+> **중요**: `.env` 파일은 절대로 Git에 커밋하지 마세요!
 
 ---
 
@@ -12,74 +14,65 @@ Firebase API 키와 앱 ID를 환경변수로 분리하여 보안을 강화했�
 
 ### 방법 1: VS Code에서 실행 (권장)
 
-1. VS Code에서 프로젝트 열기
-2. `Run and Debug` 패널 열기 (Cmd+Shift+D)
-3. 드롭다운에서 선택:
+1. 프로젝트 루트에 `.env` 파일 생성 (아래 예시 참고)
+2. VS Code에서 프로젝트 열기
+3. `Run and Debug` 패널 열기 (Cmd+Shift+D)
+4. 드롭다운에서 선택:
    - `Pause it DEV` - DEV 환경 실행
    - `Pause it PROD` - PROD 환경 실행
-4. F5 또는 재생 버튼 클릭
+5. F5 또는 재생 버튼 클릭
 
-> `.vscode/launch.json`에 환경변수가 이미 설정되어 있습니다.
+> `.env` 파일의 환경변수가 자동으로 로드됩니다.
 
 ---
 
 ### 방법 2: 빌드 스크립트 사용
 
-#### 1단계: 환경변수 파일 생성
+#### 1단계: `.env` 파일 생성
 
-```bash
-cp .env.local.example .env.local
-```
-
-#### 2단계: `.env.local` 파일 편집
-
-실제 Firebase 키로 값을 교체하세요:
+프로젝트 루트에 `.env` 파일을 생성하고 실제 Firebase 키를 추가하세요:
 
 ```bash
 # DEV 환경
-export FIREBASE_API_KEY_DEV_ANDROID="***REMOVED_API_KEY***"
-export FIREBASE_APP_ID_DEV_ANDROID="***REMOVED_APP_ID***"
-export FIREBASE_API_KEY_DEV_IOS="***REMOVED_API_KEY***"
-export FIREBASE_APP_ID_DEV_IOS="***REMOVED_APP_ID***"
+FIREBASE_API_KEY_DEV_ANDROID=your_dev_android_api_key_here
+FIREBASE_APP_ID_DEV_ANDROID=your_dev_android_app_id_here
+FIREBASE_API_KEY_DEV_IOS=your_dev_ios_api_key_here
+FIREBASE_APP_ID_DEV_IOS=your_dev_ios_app_id_here
 
 # PROD 환경
-export FIREBASE_API_KEY_PROD_ANDROID="***REMOVED_API_KEY***"
-export FIREBASE_APP_ID_PROD_ANDROID="***REMOVED_APP_ID***"
-export FIREBASE_API_KEY_PROD_IOS="***REMOVED_API_KEY***"
-export FIREBASE_APP_ID_PROD_IOS="***REMOVED_APP_ID***"
+FIREBASE_API_KEY_PROD_ANDROID=your_prod_android_api_key_here
+FIREBASE_APP_ID_PROD_ANDROID=your_prod_android_app_id_here
+FIREBASE_API_KEY_PROD_IOS=your_prod_ios_api_key_here
+FIREBASE_APP_ID_PROD_IOS=your_prod_ios_app_id_here
 ```
 
-#### 3단계: 빌드
+> **참고**: `.env` 파일은 `.gitignore`에 포함되어 있어 Git에 커밋되지 않습니다.
+
+#### 2단계: 빌드
 
 ```bash
-# 환경변수 로드
-source .env.local
-
 # DEV 빌드
-./scripts/build_dev.sh
+flutter build appbundle --flavor dev --release --target=lib/main_dev.dart
 
 # PROD 빌드
-./scripts/build_prod.sh
+flutter build appbundle --flavor prod --release --target=lib/main_prod.dart
 ```
 
 ---
 
 ### 방법 3: Flutter CLI 직접 사용
 
+> **참고**: 현재는 `flutter_dotenv` 패키지를 사용하여 `.env` 파일에서 환경변수를 로드합니다.
+> `--dart-define` 방식은 더 이상 사용하지 않습니다.
+
 ```bash
+# .env 파일이 준비되어 있다면:
+
 # DEV 환경 실행
-flutter run --flavor dev -t lib/main_dev.dart \
-  --dart-define=FIREBASE_API_KEY_DEV_ANDROID=***REMOVED_API_KEY*** \
-  --dart-define=FIREBASE_APP_ID_DEV_ANDROID=***REMOVED_APP_ID*** \
-  --dart-define=FIREBASE_API_KEY_DEV_IOS=***REMOVED_API_KEY*** \
-  --dart-define=FIREBASE_APP_ID_DEV_IOS=***REMOVED_APP_ID***
+flutter run --flavor dev -t lib/main_dev.dart
 
 # PROD 환경 빌드
-flutter build apk --release --flavor prod -t lib/main_prod.dart \
-  --dart-define=FIREBASE_API_KEY_PROD_ANDROID=***REMOVED_API_KEY*** \
-  --dart-define=FIREBASE_APP_ID_PROD_ANDROID=***REMOVED_APP_ID*** \
-  --dart-define=FIREBASE_API_KEY_PROD_IOS=***REMOVED_API_KEY*** \
-  --dart-define=FIREBASE_APP_ID_PROD_IOS=***REMOVED_APP_ID***
+flutter build apk --release --flavor prod -t lib/main_prod.dart
 ```
 
 ---
@@ -98,19 +91,19 @@ GitHub Actions에서 자동 빌드/배포를 위해 다음 Secret을 추가해�
 
 | Name | Value |
 |------|-------|
-| `FIREBASE_API_KEY_DEV_ANDROID` | `***REMOVED_API_KEY***` |
-| `FIREBASE_APP_ID_DEV_ANDROID` | `***REMOVED_APP_ID***` |
-| `FIREBASE_API_KEY_DEV_IOS` | `***REMOVED_API_KEY***` |
-| `FIREBASE_APP_ID_DEV_IOS` | `***REMOVED_APP_ID***` |
+| `FIREBASE_API_KEY_DEV_ANDROID` | Firebase Console에서 확인 |
+| `FIREBASE_APP_ID_DEV_ANDROID` | Firebase Console에서 확인 |
+| `FIREBASE_API_KEY_DEV_IOS` | Firebase Console에서 확인 |
+| `FIREBASE_APP_ID_DEV_IOS` | Firebase Console에서 확인 |
 
 ### PROD 환경 (4개)
 
 | Name | Value |
 |------|-------|
-| `FIREBASE_API_KEY_PROD_ANDROID` | `***REMOVED_API_KEY***` |
-| `FIREBASE_APP_ID_PROD_ANDROID` | `***REMOVED_APP_ID***` |
-| `FIREBASE_API_KEY_PROD_IOS` | `***REMOVED_API_KEY***` |
-| `FIREBASE_APP_ID_PROD_IOS` | `***REMOVED_APP_ID***` |
+| `FIREBASE_API_KEY_PROD_ANDROID` | Firebase Console에서 확인 |
+| `FIREBASE_APP_ID_PROD_ANDROID` | Firebase Console에서 확인 |
+| `FIREBASE_API_KEY_PROD_IOS` | Firebase Console에서 확인 |
+| `FIREBASE_APP_ID_PROD_IOS` | Firebase Console에서 확인 |
 
 ---
 
@@ -123,8 +116,8 @@ GitHub Actions에서 자동 빌드/배포를 위해 다음 Secret을 추가해�
 
 ### 해결 방법
 
-1. **로컬 개발**: `.env.local` 파일이 올바르게 설정되었는지 확인
-2. **VS Code**: `.vscode/launch.json`의 `args` 배열에 환경변수가 있는지 확인
+1. **로컬 개발**: `.env` 파일이 프로젝트 루트에 있는지 확인
+2. **파일 내용**: 모든 키가 올바르게 설정되었는지 확인
 3. **CI/CD**: GitHub Secrets가 모두 추가되었는지 확인
 
 ### 환경변수 검증
@@ -132,9 +125,11 @@ GitHub Actions에서 자동 빌드/배포를 위해 다음 Secret을 추가해�
 Firebase 초기화 전에 환경변수를 확인하려면:
 
 ```dart
-const apiKey = String.fromEnvironment('FIREBASE_API_KEY_DEV_ANDROID');
-if (apiKey.isEmpty) {
-  throw Exception('Firebase API key is not set! Check your environment variables.');
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+final apiKey = dotenv.env['FIREBASE_API_KEY_DEV_ANDROID'];
+if (apiKey == null || apiKey.isEmpty) {
+  throw Exception('Firebase API key is not set! Check your .env file.');
 }
 ```
 
@@ -145,15 +140,10 @@ if (apiKey.isEmpty) {
 ```
 pause_it/
 ├── lib/
-│   ├── firebase_options.dart          # PROD용 (환경변수 사용)
-│   └── firebase_options_dev.dart      # DEV용 (환경변수 사용)
-├── scripts/
-│   ├── build_dev.sh                   # DEV 빌드 스크립트
-│   └── build_prod.sh                  # PROD 빌드 스크립트
-├── .vscode/
-│   └── launch.json                    # VS Code 디버그 설정
-├── .env.local.example                 # 환경변수 템플릿
-└── .env.local                         # 실제 환경변수 (Git 무시)
+│   ├── firebase_options.dart          # PROD용 (dotenv 사용)
+│   └── firebase_options_dev.dart      # DEV용 (dotenv 사용)
+├── .env                               # 실제 환경변수 (Git 무시)
+└── .gitignore                         # .env 파일 제외 설정
 ```
 
 ---
@@ -161,13 +151,18 @@ pause_it/
 ## 보안 주의사항
 
 1. **절대로 커밋하지 말 것**:
-   - `.env.local` (실제 API 키 포함)
+   - `.env` (실제 API 키 포함)
+   - `.env.local`, `.env.dev`, `.env.prod` 등 모든 환경변수 파일
 
 2. **커밋 가능**:
-   - `.env.local.example` (템플릿만 포함)
-   - `lib/firebase_options.dart` (환경변수 참조만 포함)
-   - `lib/firebase_options_dev.dart` (환경변수 참조만 포함)
+   - `lib/firebase_options.dart` (dotenv 참조만 포함)
+   - `lib/firebase_options_dev.dart` (dotenv 참조만 포함)
+   - 문서 파일 (실제 API 키를 포함하지 않은 경우)
 
-3. **GitHub Actions에서만**:
-   - GitHub Secrets를 통해 환경변수 주입
+3. **GitHub Actions에서**:
+   - GitHub Secrets를 통해 `.env` 파일 자동 생성
    - 빌드 로그에 환경변수가 노출되지 않도록 주의
+
+4. **이미 노출된 API 키**:
+   - Firebase Console에서 즉시 API 키 재생성 권장
+   - Git 히스토리에서 민감한 정보 완전히 제거 필요

@@ -29,7 +29,14 @@ jobs:
       - name: Create Google Services JSON (Dev)
         if: github.ref == 'refs/heads/develop'
         run: |
+          if [ -z "${{ secrets.GOOGLE_SERVICES_JSON_DEV }}" ]; then
+            echo "❌ ERROR: GOOGLE_SERVICES_JSON_DEV Secret이 비어있습니다!"
+            exit 1
+          fi
+          echo "✓ Secret 길이: $(echo '${{ secrets.GOOGLE_SERVICES_JSON_DEV }}' | wc -c) 자"
           echo "${{ secrets.GOOGLE_SERVICES_JSON_DEV }}" | base64 --decode > android/app/src/dev/google-services.json
+          echo "✓ 파일 생성 완료"
+          cat android/app/src/dev/google-services.json | jq . > /dev/null && echo "✓ 유효한 JSON" || (echo "❌ 유효하지 않은 JSON" && exit 1)
 
       # 2-2. Google Services JSON 파일 생성 (Prod)
       - name: Create Google Services JSON (Prod)

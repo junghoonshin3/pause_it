@@ -24,7 +24,7 @@ jobs:
       # 2. 인증 파일 복원
       - name: Create Auth Files
         run: |
-          printf '%s' "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > android/firebase_credentials.json
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_BASE64 }}" | base64 --decode > android/firebase_credentials.json
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
           printf '%s' "${{ secrets.ANDROID_KEY_PROPERTIES }}" > key.properties
 

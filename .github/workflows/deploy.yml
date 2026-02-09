@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
 
@@ -28,13 +31,17 @@ jobs:
       # 2-1. Google Services JSON 파일 생성 (Dev)
       - name: Create Google Services JSON (Dev)
         if: github.ref == 'refs/heads/develop'
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_DEV }}
         run: |
-          if [ -z "${{ secrets.GOOGLE_SERVICES_DEV }}" ]; then
+          if [ -z "$DATA" ]; then
             echo "❌ ERROR: GOOGLE_SERVICES_DEV Secret이 비어있습니다!"
+            echo "DEBUG: 다른 Secrets 테스트..."
+            echo "FIREBASE_API_KEY_DEV_ANDROID 길이: $(echo '${{ secrets.FIREBASE_API_KEY_DEV_ANDROID }}' | wc -c)"
             exit 1
           fi
-          echo "✓ Secret 길이: $(echo '${{ secrets.GOOGLE_SERVICES_DEV }}' | wc -c) 자"
-          echo "${{ secrets.GOOGLE_SERVICES_DEV }}" | base64 --decode > android/app/src/dev/google-services.json
+          echo "✓ Secret 길이: $(echo "$DATA" | wc -c) 자"
+          echo "$DATA" | base64 --decode > android/app/src/dev/google-services.json
           echo "✓ 파일 생성 완료"
           cat android/app/src/dev/google-services.json | jq . > /dev/null && echo "✓ 유효한 JSON" || (echo "❌ 유효하지 않은 JSON" && exit 1)
 

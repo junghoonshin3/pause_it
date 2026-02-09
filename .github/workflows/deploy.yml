@@ -26,7 +26,7 @@ jobs:
         run: |
           echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > android/firebase_credentials.json
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
-          echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
+          echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > key.properties
 
       # 2-1. Google Services JSON 파일 생성 (Dev)
       - name: Create Google Services JSON (Dev)

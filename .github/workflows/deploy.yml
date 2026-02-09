@@ -2,7 +2,7 @@ name: Deploy to Firebase App Distribution
 
 on:
   push:
-    branches: [ "main", "develop" ] # develop은 dev, main은 prod로 배포
+    branches: [ "main", "develop" ] # PR 머지 시 자동 배포 (develop=dev, main=prod)
 
 jobs:
   build:

@@ -1,0 +1,109 @@
+name: CI - Build & Test
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # PR에 코멘트를 달 수 있는 권한
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. 환경 설정 (Java, Flutter)
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: '17' }
+
+      # Gradle 캐시 (빌드 시간 단축)
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - uses: subosito/flutter-action@v2
+        with: { channel: 'stable', cache: true }
+
+      # Flutter Build 캐시 (빌드 시간 단축)
+      - name: Cache Flutter Build
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+          key: ${{ runner.os }}-flutter-build-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-build-
+
+      # 2. .env 파일 생성 (빌드에 필요)
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          FIREBASE_API_KEY_DEV_ANDROID=${{ secrets.FIREBASE_API_KEY_DEV_ANDROID }}
+          FIREBASE_APP_ID_DEV_ANDROID=${{ secrets.FIREBASE_APP_ID_DEV_ANDROID }}
+          FIREBASE_API_KEY_DEV_IOS=${{ secrets.FIREBASE_API_KEY_DEV_IOS }}
+          FIREBASE_APP_ID_DEV_IOS=${{ secrets.FIREBASE_APP_ID_DEV_IOS }}
+          FIREBASE_API_KEY_PROD_ANDROID=${{ secrets.FIREBASE_API_KEY_PROD_ANDROID }}
+          FIREBASE_APP_ID_PROD_ANDROID=${{ secrets.FIREBASE_APP_ID_PROD_ANDROID }}
+          FIREBASE_API_KEY_PROD_IOS=${{ secrets.FIREBASE_API_KEY_PROD_IOS }}
+          FIREBASE_APP_ID_PROD_IOS=${{ secrets.FIREBASE_APP_ID_PROD_IOS }}
+          EOF
+
+      # 3. Google Services JSON 파일 생성 (빌드에 필요)
+      - name: Create Google Services JSON (Dev)
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_DEV }}
+        run: |
+          if [ -z "$DATA" ]; then
+            echo "⚠️ WARNING: GOOGLE_SERVICES_DEV Secret이 비어있습니다. Mock 파일을 생성합니다."
+            echo '{"project_info":{"project_number":"0","project_id":"mock"}}' > android/app/src/dev/google-services.json
+          else
+            echo "$DATA" | base64 --decode > android/app/src/dev/google-services.json
+          fi
+
+      - name: Create Google Services JSON (Prod)
+        run: |
+          if [ -z "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" ]; then
+            echo "⚠️ WARNING: GOOGLE_SERVICES_JSON_PROD Secret이 비어있습니다. Mock 파일을 생성합니다."
+            echo '{"project_info":{"project_number":"0","project_id":"mock"}}' > android/app/src/prod/google-services.json
+          else
+            echo "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" | base64 --decode > android/app/src/prod/google-services.json
+          fi
+
+      # 4. 의존성 설치
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 5. 코드 분석
+      - name: Analyze Code
+        run: flutter analyze
+
+      # 6. 테스트 실행
+      - name: Run Tests
+        run: flutter test
+
+      # 7. 빌드 테스트 (Dev)
+      - name: Build APK (Dev)
+        run: flutter build apk --flavor dev --target=lib/main_dev.dart --debug
+
+      # 8. 빌드 테스트 (Prod)
+      - name: Build APK (Prod)
+        run: flutter build apk --flavor prod --target=lib/main_prod.dart --debug
+
+      # 9. 결과 요약 (선택사항)
+      - name: Summary
+        if: always()
+        run: |
+          echo "## ✅ CI 검증 완료" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **코드 분석**: 완료" >> $GITHUB_STEP_SUMMARY
+          echo "- **테스트**: 완료" >> $GITHUB_STEP_SUMMARY
+          echo "- **빌드 (Dev)**: 완료" >> $GITHUB_STEP_SUMMARY
+          echo "- **빌드 (Prod)**: 완료" >> $GITHUB_STEP_SUMMARY

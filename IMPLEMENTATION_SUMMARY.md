@@ -1,251 +1,300 @@
-# Pause it - Neo-Brutalist Frontend 구현 완료
+# Google Play Console Closed Testing 자동 배포 구현 완료
 
-## ✅ 완료된 작업
+## 🎉 구현 개요
 
-### 1. 전역 테마 시스템 (`lib/core/theme/app_theme.dart`)
-- **Neo-Brutalist 디자인 시스템** 구축
-- **Google Fonts 통합** (Space Grotesk + Noto Sans)
-- **색상 팔레트** 정의 (Electric Cyan, Neon Pink, Deep Charcoal)
-- **타이포그래피 시스템** (Display, Headline, Title, Body, Label)
-- **애니메이션 설정** (Duration, Curve)
-- **Brutalist 섀도우** 정의
-
-### 2. CategoryCardBrutalist (`lib/features/categories/presentation/widgets/category_card_brutalist.dart`)
-- **날카로운 직각 디자인** (border-radius: 0)
-- **두꺼운 보더** (3px) + 강한 드롭섀도우
-- **그리드 패턴 배경** (CustomPainter)
-- **탭 애니메이션** (Scale + Shadow offset)
-- **Brutalist Bottom Sheet** (옵션 메뉴)
-- **커스텀 삭제 확인 다이얼로그**
-
-### 3. CategoriesListScreenBrutalist (`lib/features/categories/presentation/screens/categories_list_screen_brutalist.dart`)
-- **커스텀 헤더** (그라디언트 액센트 바 + 통계)
-- **Staggered 진입 애니메이션**
-- **Brutalist FAB** (직각, 강한 섀도우)
-- **빈 화면/로딩/에러 상태** 처리
-- **커스텀 페이지 전환** (Slide)
-- **Brutalist 스낵바**
-
-### 4. 의존성 추가
-- `google_fonts: ^6.2.1` 추가
-- `flutter pub get` 완료
-
-### 5. 문서화
-- `DESIGN_SYSTEM.md` - 전체 디자인 시스템 가이드
-- `FRONTEND_PREVIEW.md` - 구현 프리뷰
-- `BEFORE_AND_AFTER.md` - 변경 전후 비교
-- `IMPLEMENTATION_SUMMARY.md` - 이 파일
+Google Play Console의 Closed Testing 트랙에 자동으로 배포하는 CI/CD 파이프라인을 구축했습니다. 이제 main 브랜치에 머지하면 자동으로 AAB 파일이 Play Console에 업로드됩니다.
 
 ---
 
-## 📁 생성된 파일
+## ✅ 변경된 파일
+
+### 1. Fastlane 구성
+
+#### `android/fastlane/Pluginfile`
+- ✅ `fastlane-plugin-supply` 추가 (Play Console 업로드용)
+
+#### `android/fastlane/Appfile`
+- ✅ `json_key_file` 경로 설정: `google_play_credentials.json`
+- ✅ 패키지명 주석 업데이트
+
+#### `android/fastlane/Fastfile`
+- ✅ `deploy_to_play_console()` 함수 추가:
+  - AAB 빌드 (Play Console 필수)
+  - Closed Testing 트랙 업로드
+  - Draft 상태로 배포 (수동 검토 필요)
+- ✅ `prod` lane 변경: Firebase → Play Console
+
+#### `android/fastlane/metadata/android/ko-KR/changelogs/default.txt` (신규)
+- ✅ 기본 릴리스 노트: "버그 수정 및 안정성 개선"
+
+### 2. GitHub Actions 워크플로우
+
+#### `.github/workflows/deploy.yml`
+- ✅ 워크플로우 이름 변경: "Deploy to Firebase App Distribution & Google Play Console"
+- ✅ Google Play Console 서비스 계정 생성 단계 추가 (main 브랜치만)
+- ✅ Firebase 서비스 계정 단계 제거 (Prod는 Play Console만 사용)
+- ✅ Prod 배포 단계 이름 변경: "Deploy to Prod (Google Play Console)"
+- ✅ AAB 아티팩트 업로드 단계 추가 (7일 보관)
+
+### 3. 문서화
+
+#### `docs/google-play-console-setup.md` (신규)
+- ✅ 서비스 계정 생성 가이드 (단계별 스크린샷 설명)
+- ✅ Play Console 권한 설정 방법
+- ✅ GitHub Secrets 등록 방법
+- ✅ 로컬 테스트 가이드
+- ✅ 트러블슈팅 섹션
+- ✅ 전체 체크리스트
+
+#### `docs/DEPLOYMENT.md` (신규)
+- ✅ 빠른 시작 가이드
+- ✅ 자동 배포 워크플로우 설명
+- ✅ 필수 GitHub Secrets 목록
+- ✅ Play Console 수동 배포 절차
+- ✅ 로컬 빌드 방법
+- ✅ 트러블슈팅
+
+---
+
+## 🚀 새로운 배포 플로우
+
+### 이전 (Before)
 
 ```
-lib/
-├── core/
-│   └── theme/
-│       └── app_theme.dart ✨ NEW
-├── features/
-    └── categories/
-        └── presentation/
-            ├── screens/
-            │   └── categories_list_screen_brutalist.dart ✨ NEW
-            └── widgets/
-                └── category_card_brutalist.dart ✨ NEW
+develop → Firebase App Distribution (DEV, APK)
+main    → Firebase App Distribution (PROD, APK)
+```
 
-docs/
-├── DESIGN_SYSTEM.md ✨ NEW
-├── FRONTEND_PREVIEW.md ✨ NEW
-├── BEFORE_AND_AFTER.md ✨ NEW
-└── IMPLEMENTATION_SUMMARY.md ✨ NEW
+### 이후 (After)
+
+```
+develop → Firebase App Distribution (DEV, APK)
+main    → Google Play Console Closed Testing (PROD, AAB)
 ```
 
 ---
 
-## 🎨 주요 디자인 특징
+## 📋 다음 단계 (사용자가 해야 할 일)
 
-### 타이포그래피
-- **Display/Headlines**: Space Grotesk (기하학적, 대담함)
-- **Body/Korean**: Noto Sans (가독성, 한글 지원)
-- **대문자 사용**: UPPERCASE로 강렬함 극대화
+### 1. Google Play Console 서비스 계정 생성 ⚠️ 필수
 
-### 색상
-```
-Primary:   #1A1A1D (Deep Charcoal)
-Accent 1:  #00F0FF (Electric Cyan) - 주요 액션
-Accent 2:  #FF006E (Neon Pink) - 경고/삭제
-Accent 3:  #FBFF00 (Warning Yellow)
-```
+**참고 문서**: [`docs/google-play-console-setup.md`](./docs/google-play-console-setup.md)
 
-### 레이아웃
-- **직각 모서리** (border-radius: 0)
-- **두꺼운 보더** (2-4px)
-- **강한 섀도우** (offset 6-8px, no blur)
-- **그리드 텍스처** 배경
+#### 1.1 Google Cloud Console
+1. [Google Cloud Console](https://console.cloud.google.com/) 접속
+2. Firebase 프로젝트 선택
+3. "IAM 및 관리자" → "서비스 계정" → "서비스 계정 만들기"
+4. 이름: `pause-it-play-console-uploader`
+5. 역할: 건너뛰기 (Play Console에서 설정)
+6. "키" 탭 → JSON 키 생성 및 다운로드
 
-### 애니메이션
-- **탭**: Scale (1.0 → 0.98) + Shadow 변화
-- **진입**: Staggered fade-up (50ms delay)
-- **전환**: Slide transition (300ms)
+#### 1.2 Google Play Console
+1. [Play Console](https://play.google.com/console) 접속
+2. "설정" → "API 액세스"
+3. 서비스 계정 찾기 → "액세스 권한 부여"
+4. 권한 설정:
+   - ✅ 릴리스 보기
+   - ✅ 릴리스 제작 및 수정
+   - ❌ 릴리스 관리 및 게시 (수동 검토)
+5. "사용자 초대" 클릭
 
----
-
-## 🚀 실행 방법
-
-### 1. 앱 실행
+#### 1.3 GitHub Secrets 등록
 ```bash
-cd /Users/junghoon/Documents/develop/flutterProject/pause_it
-flutter run
+# macOS/Linux
+base64 -i pause-it-play-console-xxx.json | pbcopy
 ```
 
-### 2. 테스트 항목
-- ✅ 카테고리 카드 탭 → 스케일 애니메이션
-- ✅ 카테고리 카드 롱프레스 → Brutalist 옵션 메뉴
-- ✅ 카테고리 추가 → FAB 클릭
-- ✅ 카테고리 삭제 → 네온 핑크 다이얼로그
-- ✅ 새로고침 버튼 → 헤더 우측
-- ✅ 빈 화면 상태 → 모든 카테고리 삭제 시
+GitHub → Settings → Secrets and variables → Actions:
+- **Name**: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64`
+- **Value**: 위에서 복사한 Base64 문자열
 
 ---
 
-## 📊 코드 품질
+### 2. Fastlane 플러그인 설치 (로컬 테스트 시)
 
-### Flutter Analyze 결과
-- ❌ **0 errors** ✅
-- ⚠️ Warnings: 주로 기존 코드 (print 문, 미사용 함수)
-- ✅ **새로운 코드는 모두 clean**
+```bash
+cd android
+bundle exec fastlane add_plugin supply
+```
 
-### 성능
-- GPU 가속 Transform 사용
-- Efficient GridView.builder 유지
-- Cached CustomPainter
-- **성능 저하 없음** ✅
+> **참고**: 이 명령어는 `Pluginfile`을 자동 업데이트하지만, 이미 수동으로 추가했으므로 건너뛰어도 됩니다.
 
 ---
 
-## 🎯 달성한 목표
+### 3. 테스트 배포
 
-### ✅ 차별화
-- Generic Material Design 완전 탈피
-- 독특한 Neo-Brutalist 정체성 구축
+#### 3.1 테스트 브랜치로 검증 (권장)
 
-### ✅ 프리미엄 느낌
-- 전문 미디어 관리 도구의 이미지
-- 세련되고 의도적인 디자인
+```bash
+# 현재 브랜치(feature/test-ci-workflow)에서 테스트
+git add .
+git commit -m "feat: Google Play Console 자동 배포 구현"
+git push origin feature/test-ci-workflow
 
-### ✅ 기억성
-- 강렬한 색상과 대담한 타이포그래피
-- 즉시 인식 가능한 시각적 요소
+# 테스트용 main 브랜치 푸시 (주의: 실제 배포 발생!)
+# 또는 워크플로우 파일의 트리거를 임시로 변경하여 테스트
+```
 
-### ✅ 사용성
-- 높은 대비율 (WCAG AA+)
-- 명확한 시각적 피드백
-- 직관적인 인터랙션
+#### 3.2 실제 배포 (신중하게!)
 
----
+```bash
+# develop → main PR 생성
+# GitHub에서 PR 승인 및 머지
 
-## 📝 현재 상태
+# 자동으로 GitHub Actions 트리거
+# → AAB 빌드 → Play Console 업로드 (Draft)
+```
 
-### ✅ 완료된 화면
-- **Categories List Screen** - Neo-Brutalist 디자인 적용 완료
+#### 3.3 Play Console에서 확인
 
-### 🔄 기존 화면 (아직 변경 안 됨)
-- Video List Screen (기존 디자인)
-- Video Card (기존 디자인)
-- Add/Edit Dialogs (기존 디자인)
-
-### 💡 다음 단계 (선택사항)
-동일한 Neo-Brutalist 디자인을 적용하려면:
-1. `VideoListScreenBrutalist` 생성
-2. `VideoCardBrutalist` 생성
-3. `AddEditDialogBrutalist` 생성
+1. [Play Console](https://play.google.com/console) → "Pause it"
+2. "출시" → "테스트" → "비공개 테스트"
+3. Draft 릴리스 확인
+4. "검토" → "비공개 테스트로 출시 시작"
 
 ---
 
-## 🎨 디자인 토큰 참고
+### 4. 테스터 관리
 
-```dart
-// Spacing
-const spacing = {
-  xs: 4.0,
-  sm: 8.0,
-  md: 12.0,
-  lg: 16.0,
-  xl: 20.0,
-  xxl: 24.0,
-  xxxl: 32.0,
-};
+1. Play Console → "테스터" 탭
+2. 이메일 목록 생성 (최소 12명)
+3. 옵트인 URL 공유
+4. 14일간 테스트 진행
 
-// Border
-const border = {
-  thin: 2.0,
-  thick: 3.0,
-  heavy: 4.0,
-};
+---
 
-// Shadow (Brutalist)
-BoxShadow(
-  color: Colors.black.withValues(alpha: 0.5),
-  offset: Offset(6, 6),
-  blurRadius: 0,
+### 5. 프로덕션 전환 (심사 승인 후)
+
+Google Play 프로덕션 승인을 받은 후:
+
+**파일**: `android/fastlane/Fastfile`
+
+```ruby
+# deploy_to_play_console 함수 내부 수정
+upload_to_play_store(
+  track: "production",       # 변경: internal → production
+  # ...
+  release_status: "completed",  # 변경: draft → completed
 )
 ```
 
 ---
 
-## 📖 참고 문서
+## 🔍 검증 체크리스트
 
-1. **DESIGN_SYSTEM.md** - 전체 디자인 시스템 가이드
-2. **FRONTEND_PREVIEW.md** - 구현 결과 프리뷰
-3. **BEFORE_AND_AFTER.md** - 변경 전후 비교
-4. **CLAUDE.md** - 프로젝트 개발 가이드라인
+### GitHub Actions 확인
+- [ ] Actions 탭에서 워크플로우 실행 확인
+- [ ] "Deploy to Prod (Google Play Console)" 단계 성공
+- [ ] AAB 아티팩트 다운로드 가능 (Artifacts 섹션)
 
----
+### Play Console 확인
+- [ ] "비공개 테스트" 트랙에 Draft 릴리스 존재
+- [ ] 버전 코드 및 버전 이름 정확
+- [ ] AAB 파일 크기 정상 (예상: 20-30MB)
 
-## 🔧 기술 스택
+### 로컬 테스트 (선택사항)
+```bash
+# AAB 빌드 테스트
+flutter build appbundle --release --flavor prod -t lib/main_prod.dart
+ls -lh build/app/outputs/bundle/prodRelease/app-prod-release.aab
 
-- **Flutter**: ^3.10.4
-- **Google Fonts**: ^6.3.3
-- **Riverpod**: ^2.6.1
-- **Material 3**: Yes
-- **Theme**: Dark mode only
-
----
-
-## ✨ 핵심 성과
-
-### Before
-- 😐 평범한 Material Design
-- 😐 다른 앱과 구분 안 됨
-- 😐 Generic한 UI
-
-### After
-- 🔥 독특한 Neo-Brutalist 디자인
-- 🔥 강렬한 시각적 정체성
-- 🔥 프리미엄 미디어 도구 느낌
-- 🔥 즉시 기억에 남는 인터페이스
+# Fastlane 업로드 테스트 (서비스 계정 JSON 필요)
+cd android
+bundle exec fastlane prod
+```
 
 ---
 
-## 👨‍💻 개발 진행 상황
+## 🐛 트러블슈팅
 
-### ✅ Step 1-4: 완료 (기존)
-- [x] 프로젝트 구조 설계
-- [x] DB 모델링
-- [x] 유튜브 메타데이터 추출
-- [x] 메인 UI 개발
+### 서비스 계정 권한 오류
+```
+Insufficient permissions to perform this action
+```
 
-### ✅ Step 5: Frontend Design (NEW)
-- [x] Neo-Brutalist 테마 시스템
-- [x] Categories 화면 재디자인
-- [x] 커스텀 컴포넌트 개발
-- [x] 애니메이션 시스템
+**해결**:
+- Play Console → 설정 → API 액세스
+- 서비스 계정 권한 재확인
+- 5-10분 대기 (권한 전파)
+
+### 버전 코드 충돌
+```
+Version code XX has already been used
+```
+
+**해결**:
+```bash
+# 로컬 커밋 수 확인
+git rev-list --count HEAD
+
+# Play Console에서 최신 버전 코드 확인
+# Fastfile에서 수동 오버라이드:
+version_code_override: 123  # 최신 버전 + 1
+```
+
+### JSON 키 파일 오류
+```
+Could not find service account json file
+```
+
+**해결**:
+- GitHub Secrets 확인: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64`
+- Base64 인코딩 재확인
+- Secret 값 재등록
 
 ---
 
-**상태**: ✅ Categories 화면 Neo-Brutalist 디자인 완료
-**품질**: Production-ready
-**성능**: Optimized
-**문서화**: Complete
+## 📚 참고 문서
 
-이제 `flutter run` 명령으로 앱을 실행하고 새로운 디자인을 확인할 수 있습니다! 🔲⚡
+- **전체 설정 가이드**: [`docs/google-play-console-setup.md`](./docs/google-play-console-setup.md)
+- **배포 가이드**: [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)
+- **Fastlane supply**: https://docs.fastlane.tools/actions/upload_to_play_store/
+- **Play Console API**: https://docs.fastlane.tools/actions/supply/#setup
+
+---
+
+## 🎯 요약
+
+### 구현 완료
+- ✅ Fastlane 구성 (Play Console 업로드)
+- ✅ GitHub Actions 워크플로우 수정
+- ✅ 문서화 (설정 가이드, 배포 가이드)
+
+### 사용자가 할 일
+1. ⚠️ **Google Play Console 서비스 계정 생성 및 권한 설정**
+2. ⚠️ **GitHub Secrets 등록**: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64`
+3. ✅ Fastlane 플러그인 설치 (로컬 테스트 시)
+4. ✅ 테스트 배포 및 검증
+5. ✅ 테스터 관리 (12명, 14일)
+6. ✅ 프로덕션 전환 (심사 후)
+
+### 주요 변경 사항
+- **develop 브랜치**: Firebase (APK) - 변경 없음
+- **main 브랜치**: Firebase (APK) → Play Console (AAB)
+- **배포 상태**: 자동 완료 → Draft (수동 검토)
+
+---
+
+## 🚨 주의사항
+
+1. **서비스 계정 JSON 파일 보안**:
+   - 절대로 Git에 커밋하지 마세요!
+   - `.gitignore`에 이미 추가되어 있습니다.
+
+2. **권한 전파 시간**:
+   - Play Console에서 권한 설정 후 5-10분 대기 필요
+
+3. **버전 코드 관리**:
+   - Git 커밋 수 기반으로 자동 생성
+   - Play Console과 충돌 시 수동 오버라이드 필요
+
+4. **Draft 상태**:
+   - 자동 업로드는 Draft 상태로만 진행
+   - 실제 배포는 Play Console에서 수동으로 진행
+   - 심사 승인 후 자동 배포로 전환 가능
+
+---
+
+**구현 완료!** 🎉
+
+이제 Google Play Console 서비스 계정만 설정하면 자동 배포를 사용할 수 있습니다.

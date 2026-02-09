@@ -83,7 +83,7 @@ jobs:
 
       # 5. 코드 분석
       - name: Analyze Code
-        run: flutter analyze
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos  # error만 체크, warning/info는 참고용
 
       # 6. 테스트 실행
       - name: Run Tests

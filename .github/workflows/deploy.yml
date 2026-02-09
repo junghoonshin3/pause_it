@@ -25,6 +25,18 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
           echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
 
+      # 2-1. Google Services JSON 파일 생성 (Dev)
+      - name: Create Google Services JSON (Dev)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_DEV }}" | base64 --decode > android/app/src/dev/google-services.json
+
+      # 2-2. Google Services JSON 파일 생성 (Prod)
+      - name: Create Google Services JSON (Prod)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" | base64 --decode > android/app/src/prod/google-services.json
+
       # 3. .env 파일 생성
       - name: Create .env file
         run: |

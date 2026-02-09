@@ -28,26 +28,14 @@ jobs:
       # 2-1. Google Services JSON 파일 생성 (Dev)
       - name: Create Google Services JSON (Dev)
         if: github.ref == 'refs/heads/develop'
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON_DEV }}
         run: |
-          echo "$GOOGLE_SERVICES_JSON" > android/app/src/dev/google-services.json
-          echo "=== 생성된 google-services.json 파일 확인 ==="
-          cat android/app/src/dev/google-services.json
-          echo "=== JSON 유효성 검증 ==="
-          cat android/app/src/dev/google-services.json | jq . > /dev/null && echo "✓ 유효한 JSON" || echo "✗ 유효하지 않은 JSON"
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_DEV }}" | base64 --decode > android/app/src/dev/google-services.json
 
       # 2-2. Google Services JSON 파일 생성 (Prod)
       - name: Create Google Services JSON (Prod)
         if: github.ref == 'refs/heads/main'
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON_PROD }}
         run: |
-          echo "$GOOGLE_SERVICES_JSON" > android/app/src/prod/google-services.json
-          echo "=== 생성된 google-services.json 파일 확인 ==="
-          cat android/app/src/prod/google-services.json
-          echo "=== JSON 유효성 검증 ==="
-          cat android/app/src/prod/google-services.json | jq . > /dev/null && echo "✓ 유효한 JSON" || echo "✗ 유효하지 않은 JSON"
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" | base64 --decode > android/app/src/prod/google-services.json
 
       # 3. .env 파일 생성
       - name: Create .env file
@@ -69,11 +57,11 @@ jobs:
         run: bundle exec fastlane dev
         working-directory: android
         env:
-          FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV_ANDROID }}
+          FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV }}
 
       - name: Deploy to Prod
         if: github.ref == 'refs/heads/main'
         run: bundle exec fastlane prod
         working-directory: android
         env:
-          FIREBASE_APP_ID_PROD: ${{ secrets.FIREBASE_APP_ID_PROD_ANDROID }}
+          FIREBASE_APP_ID_PROD: ${{ secrets.FIREBASE_APP_ID_PROD }}

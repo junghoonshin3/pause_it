@@ -21,12 +21,23 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: '3.2', working-directory: android, bundler-cache: true }
 
-      # 2. 인증 파일 복원
-      - name: Create Auth Files
+      # 2. 인증 파일 복원 (공통)
+      - name: Create Keystore Files
         run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_BASE64 }}" | base64 --decode > android/firebase_credentials.json
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
           printf '%s' "${{ secrets.ANDROID_KEY_PROPERTIES }}" > key.properties
+
+      # 2-1. Firebase 서비스 계정 (Dev)
+      - name: Create Firebase Credentials (Dev)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_DEV_BASE64 }}" | base64 --decode > android/firebase_credentials.json
+
+      # 2-2. Firebase 서비스 계정 (Prod)
+      - name: Create Firebase Credentials (Prod)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_PROD_BASE64 }}" | base64 --decode > android/firebase_credentials.json
 
       # 2-1. Google Services JSON 파일 생성 (Dev)
       - name: Create Google Services JSON (Dev)

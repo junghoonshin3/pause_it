@@ -57,11 +57,11 @@ jobs:
         run: bundle exec fastlane dev
         working-directory: android
         env:
-          FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV }}
+          FIREBASE_APP_ID_DEV_ANDROID: ${{ secrets.FIREBASE_APP_ID_DEV_ANDROID }}
 
       - name: Deploy to Prod
         if: github.ref == 'refs/heads/main'
         run: bundle exec fastlane prod
         working-directory: android
         env:
-          FIREBASE_APP_ID_PROD: ${{ secrets.FIREBASE_APP_ID_PROD }}
+          FIREBASE_APP_ID_PROD_ANDROID: ${{ secrets.FIREBASE_APP_ID_PROD_ANDROID }}

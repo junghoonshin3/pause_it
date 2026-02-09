@@ -8,7 +8,7 @@ platform :android do
 
     # 2. Firebase 업로드
     firebase_app_distribution(
-      app: ENV["FIREBASE_APP_ID_#{flavor.upcase}"], # 환경변수 사용
+      app: ENV["FIREBASE_APP_ID_#{flavor.upcase}_ANDROID"], # 환경변수 사용
       service_credentials_file: "android/firebase_credentials.json",
       groups: "testers",
       android_artifact_path: "build/app/outputs/flutter-apk/app-#{flavor}-release.apk"

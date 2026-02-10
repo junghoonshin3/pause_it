@@ -56,14 +56,25 @@ android {
     signingConfigs {
         create("release") {
             val keystorePropertiesFile = rootProject.file("android/key.properties")
+            println("=== Signing Config Debug ===")
+            println("Looking for key.properties at: ${keystorePropertiesFile.absolutePath}")
+            println("File exists: ${keystorePropertiesFile.exists()}")
+
             if (keystorePropertiesFile.exists()) {
                 val keystoreProperties = Properties()
                 keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
                 keyAlias = keystoreProperties["keyAlias"].toString()
                 keyPassword = keystoreProperties["keyPassword"].toString()
-                storeFile = file(keystoreProperties["storeFile"].toString())
+                val storeFilePath = keystoreProperties["storeFile"].toString()
+                storeFile = file(storeFilePath)
                 storePassword = keystoreProperties["storePassword"].toString()
+
+                println("Keystore file path: ${storeFile?.absolutePath}")
+                println("Keystore exists: ${storeFile?.exists()}")
+                println("=== Signing Config Applied ===")
+            } else {
+                println("⚠️ WARNING: key.properties not found! Using debug keystore!")
             }
         }
     }

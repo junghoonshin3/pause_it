@@ -1,41 +1,123 @@
-name: Deploy to Firebase App Distribution
+name: Deploy to Firebase App Distribution & Google Play Console
 
 on:
   push:
-    branches: [ "main", "develop" ] # develop은 dev, main은 prod로 배포
+    branches: [ "main", "develop" ] # PR 머지 시 자동 배포 (develop=dev, main=prod)
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
 
       # 1. 환경 설정 (Java, Flutter, Ruby)
       - uses: actions/setup-java@v4
         with: { distribution: 'zulu', java-version: '17' }
+
+      # Gradle 캐시 (빌드 시간 4-5분 단축)
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - uses: subosito/flutter-action@v2
         with: { channel: 'stable', cache: true }
+
+      # Flutter Build 캐시 (빌드 시간 1-2분 단축)
+      - name: Cache Flutter Build
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+          key: ${{ runner.os }}-flutter-build-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-build-
+
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: '3.2', working-directory: android, bundler-cache: true }
 
-      # 2. 인증 파일 복원
-      - name: Create Auth Files
+      # 2. 인증 파일 복원 (공통)
+      - name: Create Keystore Files
         run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > android/firebase_credentials.json
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
-          echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
+          printf '%s' "${{ secrets.ANDROID_KEY_PROPERTIES }}" > key.properties
 
-      # 3. 브랜치에 따른 배포
-      - name: Deploy to Dev
+      # 2-1. Firebase 서비스 계정 (Dev)
+      - name: Create Firebase Credentials (Dev)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_DEV_BASE64 }}" | base64 --decode > android/firebase_credentials.json
+
+      # 2-2. Google Play Console 서비스 계정 (Prod만)
+      - name: Create Google Play Console Credentials (Prod)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}" | base64 --decode > android/google_play_credentials.json
+
+      # 2-1. Google Services JSON 파일 생성 (Dev)
+      - name: Create Google Services JSON (Dev)
+        if: github.ref == 'refs/heads/develop'
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_DEV }}
+        run: |
+          if [ -z "$DATA" ]; then
+            echo "❌ ERROR: GOOGLE_SERVICES_DEV Secret이 비어있습니다!"
+            echo "DEBUG: 다른 Secrets 테스트..."
+            echo "FIREBASE_API_KEY_DEV_ANDROID 길이: $(echo '${{ secrets.FIREBASE_API_KEY_DEV_ANDROID }}' | wc -c)"
+            exit 1
+          fi
+          echo "✓ Secret 길이: $(echo "$DATA" | wc -c) 자"
+          echo "$DATA" | base64 --decode > android/app/src/dev/google-services.json
+          echo "✓ 파일 생성 완료"
+          cat android/app/src/dev/google-services.json | jq . > /dev/null && echo "✓ 유효한 JSON" || (echo "❌ 유효하지 않은 JSON" && exit 1)
+
+      # 2-2. Google Services JSON 파일 생성 (Prod)
+      - name: Create Google Services JSON (Prod)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" | base64 --decode > android/app/src/prod/google-services.json
+
+      # 3. .env 파일 생성
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          FIREBASE_API_KEY_DEV_ANDROID=${{ secrets.FIREBASE_API_KEY_DEV_ANDROID }}
+          FIREBASE_APP_ID_DEV_ANDROID=${{ secrets.FIREBASE_APP_ID_DEV_ANDROID }}
+          FIREBASE_API_KEY_DEV_IOS=${{ secrets.FIREBASE_API_KEY_DEV_IOS }}
+          FIREBASE_APP_ID_DEV_IOS=${{ secrets.FIREBASE_APP_ID_DEV_IOS }}
+          FIREBASE_API_KEY_PROD_ANDROID=${{ secrets.FIREBASE_API_KEY_PROD_ANDROID }}
+          FIREBASE_APP_ID_PROD_ANDROID=${{ secrets.FIREBASE_APP_ID_PROD_ANDROID }}
+          FIREBASE_API_KEY_PROD_IOS=${{ secrets.FIREBASE_API_KEY_PROD_IOS }}
+          FIREBASE_APP_ID_PROD_IOS=${{ secrets.FIREBASE_APP_ID_PROD_IOS }}
+          EOF
+
+      # 4. 브랜치에 따른 배포
+      - name: Deploy to Dev (Firebase)
         if: github.ref == 'refs/heads/develop'
         run: bundle exec fastlane dev
         working-directory: android
         env:
-          FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV }}
+          FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV_ANDROID }}
 
-      - name: Deploy to Prod
+      - name: Deploy to Prod (Google Play Console)
         if: github.ref == 'refs/heads/main'
         run: bundle exec fastlane prod
         working-directory: android
-        env:
-          FIREBASE_APP_ID_PROD: ${{ secrets.FIREBASE_APP_ID_PROD }}
+
+      # 5. AAB 파일 아티팩트 업로드 (Prod만, 디버깅용)
+      - name: Upload AAB Artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-prod-release.aab
+          path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
+          retention-days: 7

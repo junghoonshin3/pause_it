@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'generated/l10n/app_localizations.dart';
 import 'shared/data/database/database_helper.dart';
 import 'features/categories/presentation/screens/categories_list_screen_brutalist.dart';
@@ -24,6 +25,7 @@ import 'firebase_options.dart';
 /// 주요 작업:
 /// - Flavor 설정 초기화 (PROD)
 /// - WidgetsFlutterBinding 초기화
+/// - 환경변수 로드 (.env)
 /// - 데이터베이스 초기화
 /// - 타임존 초기화 (알림 기능용)
 /// - 알림 서비스 초기화 및 권한 요청
@@ -31,6 +33,9 @@ import 'firebase_options.dart';
 void main() async {
   // Flutter 엔진 초기화 (데이터베이스 사용을 위해 필요)
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .env 파일 로드
+  await dotenv.load(fileName: ".env");
 
   // 파이어베이스 초기화
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

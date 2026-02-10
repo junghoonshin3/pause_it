@@ -1,0 +1,2 @@
+json_key_file("google_play_credentials.json") # CI/CD에서 자동 생성
+package_name("com.pauseit.pause_it") # Prod 패키지명

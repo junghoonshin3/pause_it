@@ -1,0 +1,48 @@
+default_platform(:android)
+
+platform :android do
+  # Firebase 배포 함수 (기존)
+  def deploy_to_firebase(flavor)
+    # 1. 빌드 (Flutter 명령어로 실행 - .env 파일에서 환경변수 로드)
+    sh("flutter build apk --release --flavor #{flavor} -t lib/main_#{flavor}.dart")
+
+    # 2. Firebase 업로드
+    firebase_app_distribution(
+      app: ENV["FIREBASE_APP_ID_#{flavor.upcase}"], # 환경변수 사용
+      service_credentials_file: "firebase_credentials.json",
+      groups: "testers",
+      android_artifact_path: "../build/app/outputs/flutter-apk/app-#{flavor}-release.apk"
+    )
+  end
+
+  # Google Play Console 배포 함수 (신규)
+  def deploy_to_play_console(flavor)
+    # 1. AAB 빌드 (Play Console 필수)
+    sh("flutter build appbundle --release --flavor #{flavor} -t lib/main_#{flavor}.dart")
+
+    # 2. Play Console 업로드
+    upload_to_play_store(
+      track: "internal",  # Closed Testing 트랙
+      aab: "../build/app/outputs/bundle/#{flavor}Release/app-#{flavor}-release.aab",
+      json_key: "google_play_credentials.json",
+      skip_upload_screenshots: true,
+      skip_upload_images: true,
+      skip_upload_metadata: false,
+      release_status: "draft",  # Draft 상태로 업로드 (수동 검토)
+      version_code_override: nil
+    )
+
+    UI.success("🎉 Google Play Console Closed Testing 업로드 완료!")
+    UI.message("📍 Play Console에서 수동으로 검토 후 배포하세요.")
+  end
+
+  # Dev Lane (기존 유지)
+  lane :dev do
+    deploy_to_firebase("dev")
+  end
+
+  # Prod Lane (Play Console로 변경)
+  lane :prod do
+    deploy_to_play_console("prod")
+  end
+end

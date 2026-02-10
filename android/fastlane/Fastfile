@@ -28,8 +28,7 @@ platform :android do
       skip_upload_screenshots: true,
       skip_upload_images: true,
       skip_upload_metadata: false,
-      release_status: "draft",  # Draft 상태로 업로드 (수동 검토)
-      version_code_override: nil
+      release_status: "draft"  # Draft 상태로 업로드 (수동 검토)
     )
 
     UI.success("🎉 Google Play Console Closed Testing 업로드 완료!")

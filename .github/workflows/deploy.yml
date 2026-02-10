@@ -48,7 +48,7 @@ jobs:
       # 2. 인증 파일 복원 (공통)
       - name: Create Keystore Files
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
+          printf '%s' "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-key.jks
           printf '%s' "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
 
       # 2-1. Firebase 서비스 계정 (Dev)

@@ -55,7 +55,7 @@ android {
     // Signing Configs for Release Build
     signingConfigs {
         create("release") {
-            val keystorePropertiesFile = rootProject.file("key.properties")
+            val keystorePropertiesFile = rootProject.file("android/key.properties")
             if (keystorePropertiesFile.exists()) {
                 val keystoreProperties = Properties()
                 keystoreProperties.load(FileInputStream(keystorePropertiesFile))
@@ -86,7 +86,7 @@ android {
     buildTypes {
         release {
             // Use release signing config if available, otherwise use debug
-            signingConfig = if (rootProject.file("key.properties").exists()) {
+            signingConfig = if (rootProject.file("android/key.properties").exists()) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")

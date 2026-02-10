@@ -24,9 +24,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-v2-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-gradle-v2-
 
       - uses: subosito/flutter-action@v2
         with: { channel: 'stable', cache: true }
@@ -38,9 +38,9 @@ jobs:
           path: |
             build
             .dart_tool
-          key: ${{ runner.os }}-flutter-build-${{ hashFiles('**/pubspec.lock') }}
+          key: ${{ runner.os }}-flutter-build-v2-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: |
-            ${{ runner.os }}-flutter-build-
+            ${{ runner.os }}-flutter-build-v2-
 
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: '3.2', working-directory: android, bundler-cache: true }
@@ -48,8 +48,16 @@ jobs:
       # 2. 인증 파일 복원 (공통)
       - name: Create Keystore Files
         run: |
-          printf '%s' "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-key.jks
+          # Base64 디코딩 (임시 파일 사용으로 안정성 향상)
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" > /tmp/keystore.b64
+          base64 -d /tmp/keystore.b64 > android/app/upload-key.jks
+
+          # key.properties 생성
           printf '%s' "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
+
+          # 검증: 생성된 keystore의 SHA1 출력
+          echo "=== Keystore SHA1 검증 ==="
+          keytool -list -v -keystore android/app/upload-key.jks -storepass 80268026 -alias upload 2>/dev/null | grep "SHA1:" || echo "SHA1 확인 실패"
 
       # 2-1. Firebase 서비스 계정 (Dev)
       - name: Create Firebase Credentials (Dev)

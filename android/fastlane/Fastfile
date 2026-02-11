@@ -22,7 +22,7 @@ platform :android do
 
     # 2. Play Console 업로드
     upload_to_play_store(
-      track: "internal",  # Closed Testing 트랙
+      track: "alpha",  # Closed Testing 트랙
       aab: "../build/app/outputs/bundle/#{flavor}Release/app-#{flavor}-release.aab",
       json_key: "google_play_credentials.json",
       skip_upload_screenshots: true,

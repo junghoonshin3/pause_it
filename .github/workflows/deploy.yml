@@ -1,8 +1,16 @@
 name: Deploy to Firebase App Distribution & Google Play Console
 
 on:
-  push:
-    branches: [ "main", "develop" ] # PR 머지 시 자동 배포 (develop=dev, main=prod)
+  workflow_dispatch:  # 수동 배포 (Actions 탭에서 Run workflow 클릭)
+    inputs:
+      target:
+        description: '배포 대상'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
 
 jobs:
   build:
@@ -63,19 +71,19 @@ jobs:
 
       # 2-1. Firebase 서비스 계정 (Dev)
       - name: Create Firebase Credentials (Dev)
-        if: github.ref == 'refs/heads/develop'
+        if: inputs.target == 'dev'
         run: |
           echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_DEV_BASE64 }}" | base64 --decode > android/firebase_credentials.json
 
       # 2-2. Google Play Console 서비스 계정 (Prod만)
       - name: Create Google Play Console Credentials (Prod)
-        if: github.ref == 'refs/heads/main'
+        if: inputs.target == 'prod'
         run: |
           echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}" | base64 --decode > android/google_play_credentials.json
 
       # 2-1. Google Services JSON 파일 생성 (Dev)
       - name: Create Google Services JSON (Dev)
-        if: github.ref == 'refs/heads/develop'
+        if: inputs.target == 'dev'
         env:
           DATA: ${{ secrets.GOOGLE_SERVICES_DEV }}
         run: |
@@ -92,7 +100,7 @@ jobs:
 
       # 2-2. Google Services JSON 파일 생성 (Prod)
       - name: Create Google Services JSON (Prod)
-        if: github.ref == 'refs/heads/main'
+        if: inputs.target == 'prod'
         run: |
           echo "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" | base64 --decode > android/app/src/prod/google-services.json
 
@@ -112,20 +120,20 @@ jobs:
 
       # 4. 브랜치에 따른 배포
       - name: Deploy to Dev (Firebase)
-        if: github.ref == 'refs/heads/develop'
+        if: inputs.target == 'dev'
         run: bundle exec fastlane dev
         working-directory: android
         env:
           FIREBASE_APP_ID_DEV: ${{ secrets.FIREBASE_APP_ID_DEV_ANDROID }}
 
       - name: Deploy to Prod (Google Play Console)
-        if: github.ref == 'refs/heads/main'
+        if: inputs.target == 'prod'
         run: bundle exec fastlane prod
         working-directory: android
 
       # 5. AAB 파일 아티팩트 업로드 (Prod만, 디버깅용)
       - name: Upload AAB Artifact
-        if: github.ref == 'refs/heads/main'
+        if: inputs.target == 'prod'
         uses: actions/upload-artifact@v4
         with:
           name: app-prod-release.aab

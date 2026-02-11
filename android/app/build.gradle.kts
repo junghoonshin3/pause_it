@@ -55,10 +55,7 @@ android {
     // Signing Configs for Release Build
     signingConfigs {
         create("release") {
-            val keystorePropertiesFile = rootProject.file("android/key.properties")
-            println("=== Signing Config Debug ===")
-            println("Looking for key.properties at: ${keystorePropertiesFile.absolutePath}")
-            println("File exists: ${keystorePropertiesFile.exists()}")
+            val keystorePropertiesFile = rootProject.file("key.properties")
 
             if (keystorePropertiesFile.exists()) {
                 val keystoreProperties = Properties()
@@ -69,12 +66,6 @@ android {
                 val storeFilePath = keystoreProperties["storeFile"].toString()
                 storeFile = file(storeFilePath)
                 storePassword = keystoreProperties["storePassword"].toString()
-
-                println("Keystore file path: ${storeFile?.absolutePath}")
-                println("Keystore exists: ${storeFile?.exists()}")
-                println("=== Signing Config Applied ===")
-            } else {
-                println("⚠️ WARNING: key.properties not found! Using debug keystore!")
             }
         }
     }
@@ -97,7 +88,7 @@ android {
     buildTypes {
         release {
             // Use release signing config if available, otherwise use debug
-            signingConfig = if (rootProject.file("android/key.properties").exists()) {
+            signingConfig = if (rootProject.file("key.properties").exists()) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")

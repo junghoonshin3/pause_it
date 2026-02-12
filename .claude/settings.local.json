@@ -27,7 +27,8 @@
       "Bash(gh secret:*)",
       "Bash(cat:*)",
       "Bash(keytool -list:*)",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(test:*)"
     ]
   }
 }
